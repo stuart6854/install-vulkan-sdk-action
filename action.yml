@@ -8,8 +8,6 @@
 
 name: "Install Vulkan SDK"
 description: "Installs the current Vulkan SDK"
-outputs:
-  VULKAN_SDK: ${{ steps.vulkan-output.outputs.VULKAN_SDK }}
 
 runs:
   using: "composite"
@@ -72,3 +70,9 @@ runs:
       id: vulkan-output
       run: |
         echo ::set-output name=VULKAN_SDK::${{ env.VULKAN_SDK }}
+        
+outputs:
+  VULKAN_SDK:
+    description: "Location of the vulkan sdk"
+    value: ${{ steps.vulkan-output.outputs.VULKAN_SDK }}
+
