@@ -1,0 +1,74 @@
+#
+# .github/workflows/build-on-windows.yml
+#
+# Copyright 2021 Jens A. Koch.
+# SPDX-License-Identifier: BSL-1.0
+# This file is part of ttauri-project.
+#
+
+name: "Install Vulkan SDK"
+description: "Installs the current Vulkan SDK"
+outputs:
+  VULKAN_SDK: ${{ steps.vulkan-output.outputs.VULKAN_SDK }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: 📥 Set latest VULKAN_VERSION as environment variable
+      shell: pwsh
+      run: |
+        echo 'VULKAN_VERSION<<EOF' >> $env:GITHUB_ENV
+        curl https://vulkan.lunarg.com/sdk/latest/windows.txt >> $env:GITHUB_ENV
+        echo 'EOF' >> $env:GITHUB_ENV
+
+    - name: 📥 Setup Environment Variables
+      shell: pwsh
+      run: |
+        echo VULKAN_SDK=C:\VulkanSDK\${{ env.VULKAN_VERSION }} >> $env:GITHUB_ENV
+        $env:BASE_URL="https://sdk.lunarg.com/sdk/download/${{ env.VULKAN_VERSION }}/windows"
+        echo VULKAN_SDK_URL=$env:BASE_URL/VulkanSDK-${{ env.VULKAN_VERSION }}-Installer.exe?Human=true >> $env:GITHUB_ENV
+        echo VULKAN_RUN_URL=$env:BASE_URL/vulkan-runtime-components.zip?Human=true >> $env:GITHUB_ENV
+
+    - name: 🎯 Cache VULKAN SDK & Runtime
+      id: cache-vulkan
+      uses: actions/cache@v1 # https://github.com/actions/cache
+      with:
+        path: ${{ env.VULKAN_SDK }}
+        key: cache-windows-vulkan-${{ env.VULKAN_VERSION }}
+
+    - name: 🔽 Install VULKAN_SDK
+      if: steps.cache-vulkan.outputs.cache-hit != 'true'
+      run: |
+        curl -L --silent --show-error --output VulkanSDK.exe %VULKAN_SDK_URL%
+        VulkanSDK.exe /S
+
+    - name: 🔽 Install VULKAN Runtime (➔ vulkan-1.dll)
+      if: steps.cache-vulkan.outputs.cache-hit != 'true'
+      run: |
+        curl -L --silent --show-error --output vulkan-runtime.zip %VULKAN_RUN_URL%
+        7z e vulkan-runtime.zip -o%VULKAN_SDK%\runtime\x64 */x64
+
+    - name: ❔ CHECK important folders, to see if everything is present (after downloading)
+      if: steps.cache-vulkan.outputs.cache-hit != 'true'
+      run: |
+        dir /S /B ${{ env.VULKAN_SDK }}
+
+    - name: ✂ Reduce VULKAN_SDK size before caching
+      if: steps.cache-vulkan.outputs.cache-hit != 'true'
+      shell: pwsh
+      run: |
+        cd ${{ env.VULKAN_SDK }}
+        "Folder size before: {0:N2} MB" -f ((ls . -r | Measure-Object -Property Length -Sum).Sum / 1MB)
+        Remove-Item -Recurse -Force "Bin32"
+        Remove-Item -Recurse -Force "Demos"
+        Remove-Item -Recurse -Force "Lib32"
+        Remove-Item -Recurse -Force "Templates"
+        Remove-Item -Recurse -Force "Third-Party"
+        Remove-Item -Recurse -Force "Tools"
+        Remove-Item -Recurse -Force "Tools32"
+        "Folder size after: {0:N2} MB" -f ((ls . -r | Measure-Object -Property Length -Sum).Sum / 1MB)
+
+    - name: 📤 Set outputs
+      id: vulkan-output
+      run: |
+        echo ::set-output name=VULKAN_SDK::${{ env.VULKAN_SDK }}
