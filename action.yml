@@ -39,7 +39,7 @@ runs:
         $env:BASE_URL="https://sdk.lunarg.com/sdk/download/${env:VULKAN_VERSION}/windows"
         $env:VULKAN_SDK_URL="${env:BASE_URL}/VulkanSDK-${env:VULKAN_VERSION}-Installer.exe?Human=true"
         $env:VULKAN_RUN_URL="${env:BASE_URL}/vulkan-runtime-components.zip?Human=true"
-        $env:VULKAN_SDK="C:\VulkanSDK\{$env:VULKAN_VERSION}"
+        $env:VULKAN_SDK="C:\VulkanSDK\${env:VULKAN_VERSION}"
         echo "VULKAN_SDK=${env:VULKAN_SDK}" >> $env:GITHUB_ENV
         echo "VULKAN_SDK_URL=${env:VULKAN_SDK_URL}" >> $env:GITHUB_ENV
         echo "VULKAN_RUN_URL=${env:VULKAN_RUN_URL}" >> $env:GITHUB_ENV
