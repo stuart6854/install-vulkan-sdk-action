@@ -41,6 +41,7 @@ runs:
         echo VULKAN_RUN_URL=$env:BASE_URL/vulkan-runtime-components.zip?Human=true >> $env:GITHUB_ENV
 
     - name: 🔽 Install VULKAN_SDK
+      shell: pwsh
       run: |
         if ( $env:INPUT_INSTALL -eq "true")
         {
@@ -49,6 +50,7 @@ runs:
         }
          
     - name: 🔽 Install VULKAN Runtime (➔ vulkan-1.dll)
+      shell: pwsh
       run: |
         if ( $env:INPUT_INSTALL -eq "true")
         {
@@ -57,7 +59,6 @@ runs:
         }
 
     - name: ✂ Reduce VULKAN_SDK size before caching
-      if: steps.cache-vulkan.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
         if ( $env:INPUT_INSTALL -eq "true")
@@ -75,8 +76,8 @@ runs:
         }
         
     - name: 📤 Set outputs
-      id: vulkan-output
+      shell: pwsh
       run: |
-        echo ::set-output name=VULKAN_SDK::${{ env.VULKAN_SDK }}
+        echo "::set-output name=VULKAN_SDK::${{ env.VULKAN_SDK }}"
         
 
