@@ -1,5 +1,5 @@
 #
-# .github/workflows/build-on-windows.yml
+# A Github Action which installs the Vulkan SDK and Runtime.
 #
 # Copyright 2021 Jens A. Koch.
 # SPDX-License-Identifier: BSL-1.0
@@ -12,14 +12,14 @@ inputs:
   install:
     description: "Install the SDK on true, or only set VULKAN_SDK output variable on false."
     required: true
-    
+
 outputs:
   VULKAN_VERSION:
-    description: "Version number of the vulkan sdk"
+    description: "Version number of the Vulkan SDK"
     value: ${{ steps.vulkan-environment.outputs.VULKAN_VERSION }}
-    
+
   VULKAN_SDK:
-    description: "Location of the vulkan sdk"
+    description: "Location of the Vulkan SDK"
     value: ${{ steps.vulkan-environment.outputs.VULKAN_SDK }}
 
 runs:
@@ -31,7 +31,7 @@ runs:
           echo 'VULKAN_VERSION<<EOF' >> $env:GITHUB_ENV
           curl --silent https://vulkan.lunarg.com/sdk/latest/windows.txt >> $env:GITHUB_ENV
           echo 'EOF' >> $env:GITHUB_ENV
-        
+
     - name: 📥 Setup download urls VULKAN_SDK_URL & VULKAN_RUN_URL
       id: vulkan-environment
       shell: pwsh
@@ -54,7 +54,7 @@ runs:
           curl -L --silent --show-error --output VulkanSDK.exe "${env:VULKAN_SDK_URL}"
           VulkanSDK.exe /S
         }
-         
+
     - name: 🔽 Install VULKAN Runtime (➔ vulkan-1.dll)
       shell: pwsh
       run: |

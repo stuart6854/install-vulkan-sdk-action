@@ -1,0 +1,50 @@
+name: "Build and Test"
+
+on: [push, pull_request]
+
+jobs:
+
+# ---------------------------------------------------------------------------------------
+
+  build-and-test:
+
+# ---------------------------------------------------------------------------------------
+
+    name: Build on ${{ matrix.config.OS}
+    runs-on: ${{ matrix.config.OS}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
+          - { OS: windows-2022 }
+          - { OS: ubuntu-latest }
+
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+      - name: 📝 Get Vulkan SDK version number
+        id: vulkan-version
+        uses: ttauri-project/install-vulkan-sdk-action@v1
+        with:
+          install: false
+
+      - name: 📝 Set VULKAN_SDK
+        shell: pwsh
+        run: echo "VULKAN_SDK=${{steps.vulkan-version.outputs.VULKAN_SDK}}" >> $env:GITHUB_ENV
+
+      - name: 🎯 Cache VULKAN SDK & Runtime
+        id: cache-vulkan
+        uses: actions/cache@v1
+        with:
+          path: ${{steps.vulkan-version.outputs.VULKAN_SDK}}
+          key: cache-windows-vulkan-${{steps.vulkan-version.outputs.VULKAN_VERSION}}
+
+      - name: 🔽 Install Vulkan SDK
+        if: steps.cache-vulkan.outputs.cache-hit != 'true'
+        uses: ttauri-project/install-vulkan-sdk-action@v1
+        with:
+          install: true
