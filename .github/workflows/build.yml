@@ -19,29 +19,33 @@ jobs:
         config:
           # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
           - { OS: windows-2022 }
-          - { OS: ubuntu-latest }
+          #- { OS: ubuntu-latest }
 
     defaults:
       run:
         shell: cmd
 
     steps:
-      - name: 📝 Get Vulkan SDK version number
+      - name: 📝 Get latest Vulkan SDK version number
         id: vulkan-version
         uses: ttauri-project/install-vulkan-sdk-action@v1
         with:
           install: false
+        run: |
+          echo "Latest Vulkan SDK version: ${{steps.vulkan-version.outputs.VULKAN_VERSION}}"
 
-      - name: 📝 Set VULKAN_SDK
+      - name: 📝 Set VULKAN_SDK path to environment
         shell: pwsh
-        run: echo "VULKAN_SDK=${{steps.vulkan-version.outputs.VULKAN_SDK}}" >> $env:GITHUB_ENV
+        run: |
+          echo "Setting environment variable 'VULKAN_SDK' to ${{steps.vulkan-version.outputs.VULKAN_SDK}}"
+          echo "VULKAN_SDK=${{steps.vulkan-version.outputs.VULKAN_SDK}}" >> $env:GITHUB_ENV
 
       - name: 🎯 Cache VULKAN SDK & Runtime
         id: cache-vulkan
         uses: actions/cache@v1
         with:
           path: ${{steps.vulkan-version.outputs.VULKAN_SDK}}
-          key: cache-windows-vulkan-${{steps.vulkan-version.outputs.VULKAN_VERSION}}
+          key: cache-${{ matrix.config.OS }}-vulkan-${{steps.vulkan-version.outputs.VULKAN_VERSION}}
 
       - name: 🔽 Install Vulkan SDK
         if: steps.cache-vulkan.outputs.cache-hit != 'true'
