@@ -10,8 +10,8 @@ jobs:
 
 # ---------------------------------------------------------------------------------------
 
-    name: Build on ${{ matrix.config.OS}
-    runs-on: ${{ matrix.config.OS}
+    name: Build on ${{ matrix.config.OS }}
+    runs-on: ${{ matrix.config.OS }}
 
     strategy:
       fail-fast: false
