@@ -31,12 +31,11 @@ jobs:
         uses: ttauri-project/install-vulkan-sdk-action@v1
         with:
           install: false
-        run: |
-          echo "Latest Vulkan SDK version: ${{steps.vulkan-version.outputs.VULKAN_VERSION}}"
 
       - name: 📝 Set VULKAN_SDK path to environment
         shell: pwsh
         run: |
+          echo "Latest Vulkan SDK version: ${{steps.vulkan-version.outputs.VULKAN_VERSION}}"
           echo "Setting environment variable 'VULKAN_SDK' to ${{steps.vulkan-version.outputs.VULKAN_SDK}}"
           echo "VULKAN_SDK=${{steps.vulkan-version.outputs.VULKAN_SDK}}" >> $env:GITHUB_ENV
 
