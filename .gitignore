@@ -1,0 +1,13 @@
+# Dependency directory
+node_modules
+
+# Ignore built ts files
+__tests__/runner/*
+lib/**/*
+
+# Action temp folder
+tmp/*
+
+# OS metadata
+.DS_Store
+Thumbs.db
