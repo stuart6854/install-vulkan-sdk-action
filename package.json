@@ -11,7 +11,8 @@
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "package": "ncc build --source-map --minify",
-    "test": "jest --coverage",
+    "test": "jest",
+    "test-cov": "jest --coverage",
     "audit": "npm audit --audit-level=high",
     "all": "npm run build && npm run format && npm run audit && npm run package && npm test"
   },
