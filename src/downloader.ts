@@ -31,7 +31,7 @@ export const getUrl_VulkanSDK = async (version: string): Promise<Download> => {
   // test, if URL is downloadable
   const statusCode = (await http.client.head(VULKAN_SDK_URL)).message.statusCode
   //if (statusCode !== 200) {
-  if(statusCode !== undefined && statusCode >= 400) {
+  if (statusCode !== undefined && statusCode >= 400) {
     const errorMessage = `❌ VULKAN_SDK was not found for version: ${version} using URL: ${VULKAN_SDK_URL}`
     core.setFailed(errorMessage)
     throw new Error(errorMessage)
@@ -49,7 +49,7 @@ export const getUrl_VulkanRuntime = async (version: string): Promise<Download> =
   // test, if URL is downloadable
   const statusCode = (await http.client.head(VULKAN_RUNTIME_URL)).message.statusCode
   //if (statusCode !== 200) {
-  if(statusCode !== undefined && statusCode >= 400) {
+  if (statusCode !== undefined && statusCode >= 400) {
     const errorMessage = `❌ VULKAN_RUNTIME was not found for version: ${version} using URL: ${VULKAN_RUNTIME_URL}`
     core.setFailed(errorMessage)
     throw new Error(errorMessage)

@@ -53,7 +53,6 @@ async function run(): Promise<void> {
 
     core.setOutput('VULKAN_VERSION', version)
     //core.setOutput('VULKAN_SDK', `${installation_path}`)
-
   } catch (error) {
     let errorMessage = 'ErrorMessage'
     if (error instanceof Error) {
