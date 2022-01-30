@@ -79,7 +79,7 @@ jobs:
 ```
 ## Action Reference
 
-You can find all Inputs and Outputs and their default settings in the [action.yml](https://github.com/jakoch/install-vulkan-sdk-action/src/action.yml) file.
+You can find all Inputs and Outputs and their default settings in the [action.yml](https://github.com/jakoch/install-vulkan-sdk-action/blob/main/action.yml) file.
 
 ### Inputs
 
@@ -93,9 +93,10 @@ The following inputs can be used as `step.with` keys:
 
 The following output variables are available:
 
-| Name          | Type    | Description                           |
-|---------------|---------|---------------------------------------|
-| `name`        | String  | desc |
+| Name             | Type    | Description                           |
+|------------------|---------|---------------------------------------|
+| `VULKAN_VERSION` | String  | The installed Vulkan SDK version.     |
+| `VULKAN_SDK`     | String  | The location of your Vulkan SDK files |
 
 ### Environment Variables
 
