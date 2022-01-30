@@ -51,4 +51,8 @@ jobs:
       - uses: ./
         with:
           # Vulkan SDK version to download. Default: latest version.
-          version: 1.2.189.1
+          version: 1.2.198.1
+          # test with intentionally wrong version
+          # should say version not available
+          # should print list of valid versions
+          #version: 1.2.189.1
