@@ -8,6 +8,7 @@
 
 name: "Install Vulkan SDK"
 description: "Installs the current Vulkan SDK"
+author: 'jakoch'
 inputs:
   install:
     description: "Install the SDK on true, or only set VULKAN_VERSION output variable on false."
