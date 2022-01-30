@@ -121,6 +121,6 @@ To enable it for your Github repo you just need to add a `.github/dependabot.yml
 
 ## License
 
-All the content in this repository is licensed under the [MIT License](https://github.com/jakoch/install-vulkan-sdk-action/main/LICENSE).
+All the content in this repository is licensed under the [MIT License](https://github.com/jakoch/install-vulkan-sdk-action/blob/main/LICENSE).
 
 Copyright (c) 2021 Jens A. Koch
