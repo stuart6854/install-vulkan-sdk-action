@@ -6,6 +6,9 @@ import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
 import {exec} from '@actions/exec'
 
+// Vulkan SDK Version Query and Download API
+// https://vulkan.lunarg.com/content/view/latest-sdk-version-api
+
 interface Download {
   version: string
   url: string
@@ -64,7 +67,7 @@ export async function download_VulkanSDK(sdk_download: Download): Promise<string
   // download Vulkan SDK installer
   let sdk_download_path: string
   try {
-    core.info(`🔽 Downloading Vulkan SDK ${sdk_download.version}...`)
+    core.info(`🔽 Downloading Vulkan SDK ${sdk_download.version} ...`)
     sdk_download_path = await tc.downloadTool(sdk_download.url)
     core.debug(`Downloaded to ${sdk_download_path}`)
   } catch (error) {
@@ -72,7 +75,6 @@ export async function download_VulkanSDK(sdk_download: Download): Promise<string
   }
 
   // rename Vulkan SDK installer (remove version from filename)
-  core.info(`- Renaming downloaded file...`)
   const filename: string = getFilename_VulkanSDK()
   const base_path = path.basename(sdk_download_path)
   const sdk_filepath = path.join(base_path, filename)
@@ -106,20 +108,24 @@ export async function download_VulkanRuntime(runtime_download: Download): Promis
 
 export async function download(version: string): Promise<string> {
   const sdk_download = await getUrl_VulkanSDK(version)
-  const sdk_download_path = await download_VulkanSDK(sdk_download)
-  const sdk_cachePath: string = await tc.cacheDir(sdk_download_path, 'vulkan_sdk', version, platform.OS_ARCH)
-  core.addPath(sdk_cachePath)
+  const sdk_installer_path = await download_VulkanSDK(sdk_download)
+
+  //tc.cacheFile(sdk_installer_path, getFilename_VulkanSDK(), 'vulkan_sdk_installer', version);
+
+  //const sdk_cachePath: string = await tc.cacheDir(sdk_download_path, 'vulkan_sdk', version, platform.OS_ARCH)
+  //core.addPath(sdk_cachePath)
 
   if (platform.IS_WINDOWS) {
     const runtime_download = await getUrl_VulkanRuntime(version)
-    const runtime_download_path = await download_VulkanRuntime(runtime_download)
-    const runtime_cachePath: string = await tc.cacheDir(runtime_download_path, 'vulkan_runtime', platform.OS_ARCH)
-    core.addPath(runtime_cachePath)
+    const runtime_installer_path = await download_VulkanRuntime(runtime_download)
+
+    //const runtime_cachePath: string = await tc.cacheDir(runtime_download_path, 'vulkan_runtime', platform.OS_ARCH)
+    //core.addPath(runtime_cachePath)
   }
 
   core.info(`✅ Vulkan SDK ${sdk_download.version} downloaded successfully!`)
 
-  return sdk_download_path
+  return sdk_installer_path
 }
 
 function getFilename_VulkanSDK(): string {
