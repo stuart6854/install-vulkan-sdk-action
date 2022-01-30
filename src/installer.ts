@@ -77,18 +77,11 @@ async function verify_installation_of_sdk(sdk_path?: string): Promise<number> {
 }
 
 function verify_installation_of_runtime(sdk_path?: string): number {
-  /*if (platform.IS_LINUX || platform.IS_MAC) {
-    exitCode = await exec(`${sdk_path}/bin/vulkaninfo`)
-  }*/
   if (platform.IS_WINDOWS) {
     return fs.existsSync(`${sdk_path}/runtime/vulkan-1.dll`) ? 1 : 0
   }
   return 0
 }
-
-/*function getDefaultPath_VulkanSDK_Windows(version: string): string {
-  return `C:\\VulkanSDK\\${version}`
-}*/
 
 async function extractArchive(archivePath: string, destination: string): Promise<string> {
   if (platform.IS_WINDOWS) {

@@ -6,7 +6,7 @@ export interface Inputs {
   version: string
   destination: string
   cache: boolean
-  optional_components: string[]
+  //optional_components: string[]
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -14,7 +14,7 @@ export async function getInputs(): Promise<Inputs> {
     version: await getInputVersion(core.getInput('version', {required: false})),
     destination: await getInputDestination(core.getInput('destination', {required: false})),
     cache: /true/i.test(core.getInput('cache', {required: false})),
-    optional_components: await getInputOptionalComponents(core.getInput('optional_components', {required: false}))
+    //optional_components: await getInputOptionalComponents(core.getInput('optional_components', {required: false}))
   }
 }
 
