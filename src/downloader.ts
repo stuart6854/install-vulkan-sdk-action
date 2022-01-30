@@ -107,27 +107,17 @@ export async function download_VulkanRuntime(runtime_download: Download): Promis
 export async function download(version: string): Promise<string> {
   const sdk_download = await getUrl_VulkanSDK(version)
   const sdk_download_path = await download_VulkanSDK(sdk_download)
-  core.debug(`SDK download path ${sdk_download_path}`)
-
   const sdk_cachePath: string = await tc.cacheDir(sdk_download_path, 'vulkan_sdk', version, platform.OS_ARCH)
-  core.debug(`🎯 Vulkan_SDK cached to ${sdk_cachePath}`)
   core.addPath(sdk_cachePath)
 
   if (platform.IS_WINDOWS) {
     const runtime_download = await getUrl_VulkanRuntime(version)
     const runtime_download_path = await download_VulkanRuntime(runtime_download)
-    core.debug(`Runtime download path ${runtime_download_path}`)
-
     const runtime_cachePath: string = await tc.cacheDir(runtime_download_path, 'vulkan_runtime', platform.OS_ARCH)
-    core.debug(`🎯 Vulkan_Runtime cached to ${runtime_cachePath}`)
     core.addPath(runtime_cachePath)
   }
 
   core.info(`✅ Vulkan SDK ${sdk_download.version} downloaded successfully!`)
-
-  // run full check on files and folders
-
-  // display overview
 
   return sdk_download_path
 }

@@ -44,10 +44,6 @@ jobs:
           - { OS: windows-2022 }
           - { OS: ubuntu-latest }
 
-    # defaults:
-    #   run:
-    #     shell: cmd
-
     steps:
 
       - uses: actions/checkout@v2 # https://github.com/actions/checkout
@@ -56,30 +52,3 @@ jobs:
         with:
           # Vulkan SDK version to download. Default: latest version.
           version: 1.2.189.1
-
-    # steps:
-    #   - name: 📝 Get latest Vulkan SDK version number
-    #     id: vulkan-version
-    #     uses: ttauri-project/install-vulkan-sdk-action@v1
-    #     with:
-    #       install: false
-
-    #   - name: 📝 Check env for VULKAN_SDK AND VULKAN_VERSION
-    #     shell: pwsh
-    #     # echo "VULKAN_SDK=${{steps.vulkan-version.outputs.VULKAN_SDK}}" >> $env:GITHUB_ENV
-    #     run: |
-    #       echo "Latest Vulkan SDK version: ${{steps.vulkan-version.outputs.VULKAN_VERSION}}"
-    #       echo "Setting environment variable 'VULKAN_SDK' to ${{steps.vulkan-version.outputs.VULKAN_SDK}}"
-
-    #   - name: 🎯 Cache VULKAN SDK & Runtime
-    #     id: cache-vulkan
-    #     uses: actions/cache@v1
-    #     with:
-    #       path: ${{steps.vulkan-version.outputs.VULKAN_SDK}}
-    #       key: cache-${{ matrix.config.OS }}-vulkan-${{steps.vulkan-version.outputs.VULKAN_VERSION}}
-
-    #   - name: 🔽 Install Vulkan SDK
-    #     if: steps.cache-vulkan.outputs.cache-hit != 'true'
-    #     uses: ttauri-project/install-vulkan-sdk-action@v1
-    #     with:
-    #       install: true
