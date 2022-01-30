@@ -19,7 +19,7 @@ export const getUrl_VulkanSDK = async (version: string): Promise<Download> => {
   let VULKAN_SDK_URL = ''
 
   if (platform.IS_WINDOWS) {
-    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/VulkanSDK-${version}-Installer.exe?Human=true`
+    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/VulkanSDK-${version}-Installer.exe`
   }
   if (platform.IS_LINUX) {
     VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkansdk-linux-x86_64-${version}.tar.gz`
@@ -44,7 +44,7 @@ export const getUrl_VulkanSDK = async (version: string): Promise<Download> => {
 // vulkan-runtime-components is a windows specific download shipping "vulkan-1.dll" for x86 and x64.
 export const getUrl_VulkanRuntime = async (version: string): Promise<Download> => {
   // URL
-  const VULKAN_RUNTIME_URL = `https://sdk.lunarg.com/sdk/download/${version}/windows/vulkan-runtime-components.zip?Human=true`
+  const VULKAN_RUNTIME_URL = `https://sdk.lunarg.com/sdk/download/${version}/windows/vulkan-runtime-components.zip`
 
   // test, if URL is downloadable
   const statusCode = (await http.client.head(VULKAN_RUNTIME_URL)).message.statusCode
