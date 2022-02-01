@@ -9,12 +9,14 @@ import * as tc from '@actions/tool-cache'
 export async function get_url_vulkan_sdk(version: string): Promise<string> {
   const platformName = platform.getPlatform()
 
+  // for download urls see https://vulkan.lunarg.com/sdk/home
+
   const DOWNLOAD_BASE_URL = `https://sdk.lunarg.com/sdk/download/${version}/${platformName}`
 
   let VULKAN_SDK_URL = ''
 
   if (platform.IS_WINDOWS) {
-    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/VulkanSDK-Installer-${version}.exe`
+    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/VulkanSDK-${version}-Installer.exe`
   }
   if (platform.IS_LINUX) {
     VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkansdk-linux-x86_64-${version}.tar.gz`

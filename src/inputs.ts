@@ -5,7 +5,8 @@ import * as version_getter from './versiongetter'
 export interface Inputs {
   version: string
   destination: string
-  cache: boolean
+  //cache: boolean
+  install_runtime: boolean
   //optional_components: string[]
 }
 
@@ -13,7 +14,8 @@ export async function getInputs(): Promise<Inputs> {
   return {
     version: await getInputVersion(core.getInput('version', {required: false})),
     destination: await getInputDestination(core.getInput('destination', {required: false})),
-    cache: /true/i.test(core.getInput('cache', {required: false}))
+    //cache: /true/i.test(core.getInput('cache', {required: false})),
+    install_runtime: /true/i.test(core.getInput('install_runtime', {required: false}))
     //optional_components: await getInputOptionalComponents(core.getInput('optional_components', {required: false}))
   }
 }

@@ -4,15 +4,7 @@ import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
 import {exec} from '@actions/exec'
 
-export async function install(path_to_installer: string, destination: string): Promise<string> {
-  const sdk_path = install_vulkan_sdk(path_to_installer, destination)
-  if (platform.IS_WINDOWS) {
-    install_vulkan_runtime(path_to_installer, destination)
-  }
-  return sdk_path
-}
-
-async function install_vulkan_sdk(sdk_installer_filepath: string, destination: string): Promise<string> {
+export async function install_vulkan_sdk(sdk_installer_filepath: string, destination: string): Promise<string> {
   if (platform.IS_LINUX || platform.IS_MAC) {
     await exec('chmod', ['+x', sdk_installer_filepath])
   }
@@ -42,7 +34,7 @@ async function install_vulkan_sdk(sdk_installer_filepath: string, destination: s
   return install_path
 }
 
-async function install_vulkan_runtime(runtime_archive_filepath: string, destination: string): Promise<string> {
+export async function install_vulkan_runtime(runtime_archive_filepath: string, destination: string): Promise<string> {
   core.info(`📦 Extracting Vulkan Runtime...`)
   const runtime_destination = `${destination}/runtime`
   const install_path = extract_archive(runtime_archive_filepath, runtime_destination)

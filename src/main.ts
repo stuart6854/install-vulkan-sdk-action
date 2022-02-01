@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as downloader from './downloader'
 import * as input from './inputs'
 import * as installer from './installer'
-import * as os from 'os'
+import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
 import * as version_getter from './versiongetter'
 import {debug} from 'console'
@@ -15,14 +15,14 @@ export function add_path_variable(value: string): string {
 }
 
 function show_cache(): void {
-  const cachedVersions = tc.findAllVersions('vulkan_sdk', os.arch())
+  const cachedVersions = tc.findAllVersions('vulkan_sdk', platform.OS_ARCH)
   if (cachedVersions.length !== 0) {
     debug(`Versions of vulkan_sdk available: ${cachedVersions}`)
   }
 }
 
 async function find_in_cache_vulkan_sdk(version: string): Promise<string> {
-  return tc.find('vulkan_sdk', version, os.arch())
+  return tc.find('vulkan_sdk', version, platform.OS_ARCH)
 }
 
 async function download_vulkan_sdk(version: string): Promise<string> {
@@ -38,7 +38,7 @@ async function get_vulkan_sdk(version: string): Promise<string> {
 }
 
 async function find_in_cache_vulkan_runtime(version: string): Promise<string> {
-  return tc.find('vulkan_runtime', version, os.arch())
+  return tc.find('vulkan_runtime', version, platform.OS_ARCH)
 }
 
 async function download_vulkan_runtime(version: string): Promise<string> {
@@ -61,7 +61,7 @@ async function run(): Promise<void> {
 
     const sdk_installer_path = await get_vulkan_sdk(version)
 
-    const installation_path = await installer.install(sdk_installer_path, inputs.destination)
+    const installation_path = await installer.install_vulkan_sdk(sdk_installer_path, inputs.destination)
 
     debug(`Installation Path -> ${installation_path}`)
 
@@ -74,6 +74,11 @@ async function run(): Promise<void> {
     core.info(`The environment variable VULKAN_SDK was set to "${installation_path}".`)
 
     core.setOutput('VULKAN_VERSION', version)
+
+    if (inputs.install_runtime && platform.IS_WINDOWS) {
+      const runtime_archive_path = await get_vulkan_runtime(version)
+      const installation_path = await installer.install_vulkan_runtime(runtime_archive_path, inputs.destination)
+    }
   } catch (error) {
     let errorMessage = 'ErrorMessage'
     if (error instanceof Error) {

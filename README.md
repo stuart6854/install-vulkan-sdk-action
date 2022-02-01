@@ -88,6 +88,8 @@ The following inputs can be used as `step.with` keys:
 | Name               | Type    | Description                       |
 |--------------------|---------|-----------------------------------|
 | `version`          | String  | A Vulkan SDK version. (eg. `1.2.189.2`). If `version` is not set, the latest version is used. |
+| `destination`      | String  | The path, where the Vulkan SDK should be installed into. Windows default installation path: `C:\\VulkanSDK`. |
+| `install_runtime`  | bool    | A windows specific toggle to also install the vulkan runtime ('vulkan-1.dll'), if true. |
 
 ### Outputs
 
