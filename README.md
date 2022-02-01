@@ -1,8 +1,6 @@
-[![GitHub release](https://img.shields.io/github/release/jakoch/install-vulkan-sdk-action.svg?style=flat-square)](https://github.com/jakoch/install-vulkan-sdk-action/releases/latest)
-[![GitHub marketplace](https://img.shields.io/badge/marketplace-docker--setup--buildx-blue?logo=github&style=flat-square)](https://github.com/marketplace/actions/install-vulkan-sdk-action)
-[![CI workflow](https://img.shields.io/github/workflow/status/jakoch/install-vulkan-sdk-action/ci?label=ci&logo=github&style=flat-square)](https://github.com/jakoch/install-vulkan-sdk-action/actions?workflow=ci)
-[![Test workflow](https://img.shields.io/github/workflow/status/jakoch/install-vulkan-sdk-action/test?label=test&logo=github&style=flat-square)](https://github.com/jakoch/install-vulkan-sdk-action/actions?workflow=test)
-[![Codecov](https://img.shields.io/codecov/c/github/jakoch/install-vulkan-sdk-action?logo=codecov&style=flat-square)](https://codecov.io/gh/jakoch/install-vulkan-sdk-action)
+[![GitHub Releases](https://img.shields.io/github/release/jakoch/install-vulkan-sdk-action.svg?style=flat-square)](https://github.com/jakoch/install-vulkan-sdk-action/releases/latest)
+[![GitHub Marketplace](https://img.shields.io/badge/marketplace-install-vulkan-sdk-action?logo=github&style=flat-square)](https://github.com/marketplace/actions/install-vulkan-sdk-action)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jakoch/install-vulkan-sdk-action/%F0%9F%9A%80%20Build%20and%20Test?label=%F0%9F%9A%80%20Build%20and%20Test&logo=github&style=flat-square)](https://github.com/jakoch/install-vulkan-sdk-action/actions?workflow=build.yml)
 
 # Github Action ➔ Install Vulkan SDK
 
