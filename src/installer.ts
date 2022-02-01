@@ -4,12 +4,57 @@ import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
 import {exec} from '@actions/exec'
 
-export async function install(download_path: string, destination: string): Promise<string> {
-  const sdk_path = install_vulkan_sdk(download_path, destination)
+export async function install(path_to_installer: string, destination: string): Promise<string> {
+  const sdk_path = install_vulkan_sdk(path_to_installer, destination)
   if (platform.IS_WINDOWS) {
-    install_vulkan_runtime(download_path, destination)
+    install_vulkan_runtime(path_to_installer, destination)
   }
   return sdk_path
+}
+
+async function install_vulkan_sdk(sdk_installer_filepath: string, destination: string): Promise<string> {
+  if (platform.IS_LINUX || platform.IS_MAC) {
+    await exec('chmod', ['+x', sdk_installer_filepath])
+  }
+  let install_path = ''
+  if (platform.IS_LINUX) {
+    install_path = await extract_archive(sdk_installer_filepath, destination)
+  }
+  if (platform.IS_WINDOWS) {
+    // TODO allow installing optional components
+    // --confirm-command install com.lunarg.vulkan.32bit
+    //                           com.lunarg.vulkan.thirdparty
+    //                           com.lunarg.vulkan.debug
+    //                           com.lunarg.vulkan.debug32
+    const exitCode = await exec(sdk_installer_filepath, [
+      '--root',
+      destination,
+      '--accept-licenses',
+      '--default-answer',
+      '--confirm-command install'
+    ])
+    if (exitCode !== 0) {
+      core.setFailed('Failed to run ${sdk_installer_filepath}.')
+    } else {
+      install_path = destination
+    }
+  }
+  return install_path
+}
+
+async function install_vulkan_runtime(runtime_archive_filepath: string, destination: string): Promise<string> {
+  core.info(`📦 Extracting Vulkan Runtime...`)
+  const runtime_destination = `${destination}/runtime`
+  const install_path = extract_archive(runtime_archive_filepath, runtime_destination)
+  return install_path
+}
+
+async function extract_archive(archivePath: string, destination: string): Promise<string> {
+  if (platform.IS_WINDOWS) {
+    return await tc.extractZip(archivePath, destination)
+  } else {
+    return await tc.extractTar(archivePath, destination)
+  }
 }
 
 export async function verify_installation(sdk_path: string): Promise<number> {
@@ -19,43 +64,6 @@ export async function verify_installation(sdk_path: string): Promise<number> {
     exitCode = exitCode && verify_installation_of_runtime(sdk_path)
   }
   return exitCode
-}
-
-async function install_vulkan_sdk(sdk_installer_filepath: string, destination: string): Promise<string> {
-  let install_path = ''
-  if (platform.IS_LINUX) {
-    install_path = await extractArchive(sdk_installer_filepath, destination)
-  }
-  if (platform.IS_WINDOWS) {
-    // TODO allow installing optional components
-    // --confirm-command install com.lunarg.vulkan.32bit
-    //                           com.lunarg.vulkan.thirdparty
-    //                           com.lunarg.vulkan.debug
-    //                           com.lunarg.vulkan.debug32
-
-    const exitCode = await exec('VulkanSDK-Installer.exe', [
-      '--root',
-      destination,
-      '--accept-licenses',
-      '--default-answer',
-      '--confirm-command install'
-    ])
-    if (exitCode !== 0) {
-      core.setFailed('Failed to run VulkanSDK-Installer.exe.')
-    } else {
-      install_path = destination
-    }
-  }
-  core.addPath(install_path)
-  return install_path
-}
-
-async function install_vulkan_runtime(runtime_archive_filepath: string, destination: string): Promise<string> {
-  core.info(`📦 Extracting Vulkan Runtime...`)
-  const runtime_destination = `${destination}/runtime`
-  const extractionPath = extractArchive(runtime_archive_filepath, runtime_destination)
-  core.debug(`📂 Extracted to ${extractionPath}`)
-  return extractionPath
 }
 
 async function verify_installation_of_sdk(sdk_path?: string): Promise<number> {
@@ -81,12 +89,4 @@ function verify_installation_of_runtime(sdk_path?: string): number {
     return fs.existsSync(`${sdk_path}/runtime/vulkan-1.dll`) ? 1 : 0
   }
   return 0
-}
-
-async function extractArchive(archivePath: string, destination: string): Promise<string> {
-  if (platform.IS_WINDOWS) {
-    return await tc.extractZip(archivePath, destination)
-  } else {
-    return await tc.extractTar(archivePath, destination)
-  }
 }

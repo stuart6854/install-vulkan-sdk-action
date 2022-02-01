@@ -8,51 +8,72 @@ import * as version_getter from './versiongetter'
 import {debug} from 'console'
 import {execSync} from 'child_process'
 
-// use core.exportVariable?
-export function setEnvVar(name: string, value: string): string {
-  return execSync(`echo "${name}=${value}" >> $GITHUB_ENV`, {
+export function add_path_variable(value: string): string {
+  return execSync(`echo "PATH=$PATH:${value}" >> $GITHUB_ENV`, {
     stdio: 'pipe'
   }).toString()
 }
 
-export function addToPathVar(value: string): string {
-  return execSync(`echo "PATH=$PATH:${value}" >> $GITHUB_ENV`, {
-    stdio: 'pipe'
-  }).toString()
+function show_cache(): void {
+  const cachedVersions = tc.findAllVersions('vulkan_sdk', os.arch())
+  if (cachedVersions.length !== 0) {
+    debug(`Versions of vulkan_sdk available: ${cachedVersions}`)
+  }
+}
+
+async function find_in_cache_vulkan_sdk(version: string): Promise<string> {
+  return tc.find('vulkan_sdk', version, os.arch())
+}
+
+async function download_vulkan_sdk(version: string): Promise<string> {
+  return await downloader.download_vulkan_sdk(version)
+}
+
+async function get_vulkan_sdk(version: string): Promise<string> {
+  let s = await find_in_cache_vulkan_sdk(version)
+  if (!s) {
+    s = await download_vulkan_sdk(version)
+  }
+  return s
+}
+
+async function find_in_cache_vulkan_runtime(version: string): Promise<string> {
+  return tc.find('vulkan_runtime', version, os.arch())
+}
+
+async function download_vulkan_runtime(version: string): Promise<string> {
+  return await downloader.download_vulkan_runtime(version)
+}
+
+async function get_vulkan_runtime(version: string): Promise<string> {
+  let s = await find_in_cache_vulkan_runtime(version)
+  if (!s) {
+    s = await download_vulkan_runtime(version)
+  }
+  return s
 }
 
 async function run(): Promise<void> {
   try {
     const inputs: input.Inputs = await input.getInputs()
 
-    const version = await version_getter.determineVersionToDownload(inputs.version)
+    const version = await version_getter.determine_version_to_download(inputs.version)
 
-    /*const cachedVersions = tc.findAllVersions('vulkan_sdk')
-    if (cachedVersions.length !== 0) {
-      debug(`Versions of vulkan_sdk available: ${cachedVersions}`)
-    }*/
+    const sdk_installer_path = await get_vulkan_sdk(version)
 
-    const cacheDir = tc.find('vulkan_sdk', version, os.arch())
+    const installation_path = await installer.install(sdk_installer_path, inputs.destination)
 
-    if (cacheDir) {
-      debug(`Installation Path (from cache) -> ${cacheDir}`)
-      core.addPath(cacheDir)
-      addToPathVar(`${cacheDir}`)
-      setEnvVar('VULKAN_SDK', `${cacheDir}`)
-    } else {
-      const download_path = await downloader.download(version)
-      //debug(`Download Path -> ${download_path}`)
-      const installation_path = installer.install(download_path, inputs.destination)
-      //debug(`Installation Path -> ${installation_path}`)
-      addToPathVar(`${installation_path}`)
-      setEnvVar('VULKAN_SDK', `${installation_path}`)
-    }
+    debug(`Installation Path -> ${installation_path}`)
+
+    add_path_variable(`${installation_path}`)
+
+    core.exportVariable('VULKAN_SDK', `${installation_path}`)
 
     core.info(`Successfully added VULKAN_SDK ${version} to PATH.`)
-    core.info(`The environment variable VULKAN_SDK was set to ${cacheDir}.`)
+
+    core.info(`The environment variable VULKAN_SDK was set to "${installation_path}".`)
 
     core.setOutput('VULKAN_VERSION', version)
-    //core.setOutput('VULKAN_SDK', `${installation_path}`)
   } catch (error) {
     let errorMessage = 'ErrorMessage'
     if (error instanceof Error) {
@@ -63,3 +84,6 @@ async function run(): Promise<void> {
 }
 
 run()
+function get_VulkanSDK() {
+  throw new Error('Function not implemented.')
+}

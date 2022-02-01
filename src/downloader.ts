@@ -4,17 +4,9 @@ import * as io from '@actions/io'
 import * as path from 'path'
 import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
-import {exec} from '@actions/exec'
 
-// Vulkan SDK Version Query and Download API
-// https://vulkan.lunarg.com/content/view/latest-sdk-version-api
-
-interface Download {
-  version: string
-  url: string
-}
-
-export const getUrl_VulkanSDK = async (version: string): Promise<Download> => {
+// return download object with version and url
+export async function get_url_vulkan_sdk(version: string): Promise<string> {
   const platformName = platform.getPlatform()
 
   const DOWNLOAD_BASE_URL = `https://sdk.lunarg.com/sdk/download/${version}/${platformName}`
@@ -22,7 +14,7 @@ export const getUrl_VulkanSDK = async (version: string): Promise<Download> => {
   let VULKAN_SDK_URL = ''
 
   if (platform.IS_WINDOWS) {
-    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/VulkanSDK-${version}-Installer.exe`
+    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/VulkanSDK-Installer-${version}.exe`
   }
   if (platform.IS_LINUX) {
     VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkansdk-linux-x86_64-${version}.tar.gz`
@@ -42,11 +34,11 @@ export const getUrl_VulkanSDK = async (version: string): Promise<Download> => {
 
   core.info(`✔️ [VULKAN_SDK] Version found: ${version}`)
 
-  return {version: version, url: VULKAN_SDK_URL}
+  return VULKAN_SDK_URL
 }
 
 // vulkan-runtime-components is a windows specific download shipping "vulkan-1.dll" for x86 and x64.
-export const getUrl_VulkanRuntime = async (version: string): Promise<Download> => {
+export async function get_url_vulkan_runtime(version: string): Promise<string> {
   const VULKAN_RUNTIME_URL = `https://sdk.lunarg.com/sdk/download/${version}/windows/vulkan-runtime-components.zip`
 
   // test, if URL is downloadable
@@ -60,84 +52,54 @@ export const getUrl_VulkanRuntime = async (version: string): Promise<Download> =
 
   core.info(`✔️ [VULKAN_RUNTIME] Version found: ${version}`)
 
-  return {version: version, url: VULKAN_RUNTIME_URL}
+  return VULKAN_RUNTIME_URL
 }
 
-export async function download_VulkanSDK(sdk_download: Download): Promise<string> {
-  // download Vulkan SDK installer
+// returns sdk_installer_cache_path
+export async function download_vulkan_sdk(version: string): Promise<string> {
   let sdk_download_path: string
   try {
-    core.info(`🔽 Downloading Vulkan SDK ${sdk_download.version} ...`)
-    sdk_download_path = await tc.downloadTool(sdk_download.url)
+    core.info(`🔽 Downloading Vulkan SDK ${version} ...`)
+    const url = await get_url_vulkan_sdk(version)
+    sdk_download_path = await tc.downloadTool(url)
     core.debug(`Downloaded to ${sdk_download_path}`)
   } catch (error) {
     throw error
   }
 
-  // rename Vulkan SDK installer (remove version from filename)
-  const filename: string = getFilename_VulkanSDK()
-  const base_path = path.basename(sdk_download_path)
-  const sdk_filepath = path.join(base_path, filename)
-  await io.mv(sdk_download_path, sdk_filepath)
+  core.info(`✔️ Vulkan SDK Installer ${version} downloaded successfully!`)
+  core.debug(`Path to installer is ${sdk_download_path}`)
 
-  if (platform.IS_LINUX || platform.IS_MAC) {
-    core.info(`- Fixing file permissions...`)
-    await exec('chmod', ['+x', sdk_filepath])
-  }
+  // cache
+  const versionized_filename = path.basename(sdk_download_path)
+  const sdk_installer_cache_path = tc.cacheFile(sdk_download_path, versionized_filename, 'vulkan-sdk', version)
+  core.debug(`Path to cached installer is ${sdk_installer_cache_path}`)
 
-  core.info(`✔️ Vulkan SDK Installer ${sdk_download.version} downloaded successfully!`)
-  core.debug(`Path to installer is ${sdk_filepath}`)
-
-  return sdk_filepath
+  // return path to cached file; and not sdk_download_path !
+  return sdk_installer_cache_path
 }
 
-export async function download_VulkanRuntime(runtime_download: Download): Promise<string> {
+export async function download_vulkan_runtime(version: string): Promise<string> {
   let runtime_download_path: string
   try {
-    core.info(`🔽 Downloading Vulkan Runtime ${runtime_download.version}...`)
-    runtime_download_path = await tc.downloadTool(runtime_download.url)
+    core.info(`🔽 Downloading Vulkan Runtime ${version}...`)
+    const url = await get_url_vulkan_runtime(version)
+    runtime_download_path = await tc.downloadTool(url)
   } catch (error) {
     throw error
   }
 
-  core.info(`✔️ Vulkan Runtime ${runtime_download.version} downloaded successfully!`)
-  core.debug(`Path to runtime is ${runtime_download_path}`)
+  // cache
+  const filename = get_versionized_filename_vulkan_runtime(version)
+  const runtime_cache_path = tc.cacheFile(runtime_download_path, filename, 'vulkan-runtime', version)
 
-  return runtime_download_path
+  core.info(`✔️ Vulkan Runtime ${version} downloaded successfully!`)
+  core.debug(`Path to runtime is ${runtime_cache_path}`)
+
+  return runtime_cache_path
 }
 
-export async function download(version: string): Promise<string> {
-  const sdk_download = await getUrl_VulkanSDK(version)
-  const sdk_installer_path = await download_VulkanSDK(sdk_download)
-
-  //tc.cacheFile(sdk_installer_path, getFilename_VulkanSDK(), 'vulkan_sdk_installer', version);
-
-  //const sdk_cachePath: string = await tc.cacheDir(sdk_download_path, 'vulkan_sdk', version, platform.OS_ARCH)
-  //core.addPath(sdk_cachePath)
-
-  if (platform.IS_WINDOWS) {
-    const runtime_download = await getUrl_VulkanRuntime(version)
-    const runtime_installer_path = await download_VulkanRuntime(runtime_download)
-
-    //const runtime_cachePath: string = await tc.cacheDir(runtime_download_path, 'vulkan_runtime', platform.OS_ARCH)
-    //core.addPath(runtime_cachePath)
-  }
-
-  core.info(`✅ Vulkan SDK ${sdk_download.version} downloaded successfully!`)
-
-  return sdk_installer_path
-}
-
-function getFilename_VulkanSDK(): string {
-  // return the platform-based non-versionized filename
-  if (platform.IS_WINDOWS) {
-    return `VulkanSDK-Installer.exe`
-  }
-  if (platform.IS_LINUX) {
-    return `vulkansdk-linux-x86_64.tar.gz`
-  }
-  if (platform.IS_MAC) {
-    return `vulkansdk-macos.dmg`
-  }
-  return ''
+// return the platform-based (windows-only) versionized filename
+function get_versionized_filename_vulkan_runtime(version: string): string {
+  return `vulkan-runtime-components-${version}.zip`
 }

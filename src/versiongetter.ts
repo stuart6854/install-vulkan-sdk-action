@@ -2,6 +2,9 @@ import * as core from '@actions/core'
 import * as http from './http'
 import * as platform from './platform'
 
+// Vulkan SDK Version Query and Download API
+// https://vulkan.lunarg.com/content/view/latest-sdk-version-api
+
 /**
  * Latest Version Response.
  *
@@ -48,7 +51,7 @@ export const getLatestVersions = async (): Promise<LatestVersionResponse | null>
 // in the end, the version to download is either
 //    a) a manually passed in version
 // or b) the automatically resolved latest version for the platform.
-export async function determineVersionToDownload(version: string): Promise<string> {
+export async function determine_version_to_download(version: string): Promise<string> {
   let versionToDownload: string = version
   if (version === 'latest') {
     try {
