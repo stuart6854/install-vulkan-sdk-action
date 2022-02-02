@@ -34,7 +34,7 @@ export async function get_url_vulkan_sdk(version: string): Promise<string> {
     throw new Error(errorMessage)
   }
 
-  core.info(`✔️ [VULKAN_SDK] Version found: ${version}`)
+  core.info(`✔️ The VULKAN_SDK version was found: ${version}`)
 
   return VULKAN_SDK_URL
 }
@@ -52,7 +52,7 @@ export async function get_url_vulkan_runtime(version: string): Promise<string> {
     throw new Error(errorMessage)
   }
 
-  core.info(`✔️ [VULKAN_RUNTIME] Version found: ${version}`)
+  core.info(`✔️ The VULKAN_RUNTIME version was found: ${version}`)
 
   return VULKAN_RUNTIME_URL
 }
@@ -60,22 +60,24 @@ export async function get_url_vulkan_runtime(version: string): Promise<string> {
 // returns sdk_installer_cache_path
 export async function download_vulkan_sdk(version: string): Promise<string> {
   let sdk_download_path: string
+  let versionized_filename: string
   try {
-    core.info(`🔽 Downloading Vulkan SDK ${version} ...`)
+    core.info(`🔽 Downloading Vulkan SDK ${version}`)
     const url = await get_url_vulkan_sdk(version)
     sdk_download_path = await tc.downloadTool(url)
-    core.debug(`Downloaded to ${sdk_download_path}`)
+    core.info(`Downloaded to ${sdk_download_path}`)
+    versionized_filename = url.substring(url.lastIndexOf('/') + 1)
+    core.info(`Versionized Filename: ${versionized_filename}`)
   } catch (error) {
     throw error
   }
 
   core.info(`✔️ Vulkan SDK Installer ${version} downloaded successfully!`)
-  core.debug(`Path to installer is ${sdk_download_path}`)
+  core.info(`Path to installer is ${sdk_download_path}`)
 
   // cache
-  const versionized_filename = path.basename(sdk_download_path)
   const sdk_installer_cache_path = tc.cacheFile(sdk_download_path, versionized_filename, 'vulkan-sdk', version)
-  core.debug(`Path to cached installer is ${sdk_installer_cache_path}`)
+  core.info(`Path to cached installer is ${sdk_installer_cache_path}`)
 
   // return path to cached file; and not sdk_download_path !
   return sdk_installer_cache_path
@@ -96,7 +98,7 @@ export async function download_vulkan_runtime(version: string): Promise<string> 
   const runtime_cache_path = tc.cacheFile(runtime_download_path, filename, 'vulkan-runtime', version)
 
   core.info(`✔️ Vulkan Runtime ${version} downloaded successfully!`)
-  core.debug(`Path to runtime is ${runtime_cache_path}`)
+  core.info(`Path to runtime is ${runtime_cache_path}`)
 
   return runtime_cache_path
 }
