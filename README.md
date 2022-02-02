@@ -4,7 +4,7 @@
 
 # Github Action ➔ Install Vulkan SDK
 
-A Github Action to install the Vulkan SDK.
+A Github Action to install the Vulkan SDK and it's runtime.
 
 This action can be used to install the Vulkan SDK in your Github Action workflows.
 
@@ -69,7 +69,7 @@ jobs:
         with:
           # You can set the VULKAN SDK version to download.
           # Defaults to latest version, if version not set.
-          version: 1.2.189.0
+          version: 1.2.198.1
 
 ```
 ## Action Reference
@@ -80,28 +80,28 @@ You can find all Inputs and Outputs and their default settings in the [action.ym
 
 The following inputs can be used as `steps.with` keys:
 
-| Name               | Type    | Description                       |
-|--------------------|---------|-----------------------------------|
-| `version`          | String  | A Vulkan SDK version. (eg. `1.2.189.2`). If `version` is not set, the latest version is used. |
-| `destination`      | String  | The path, where the Vulkan SDK should be installed into. Windows default installation path: `C:\\VulkanSDK`. |
-| `install_runtime`  | bool    | A windows specific toggle to also install the vulkan runtime ('vulkan-1.dll'), if true. |
+| Name               | Type    | Description                           | Default                 | Required |
+|--------------------|---------|---------------------------------------|-------------------------|----------|
+| `version`          | String  | A Vulkan SDK version (eg. `1.2.189.2`). | If `version` is not set, the latest version is used.  | false |
+| `destination`      | String  | The Vulkan SDK installation folder.     | Windows: `C:\VulkanSDK`.                              | false |
+| `install_runtime`  | bool    | A windows specific toggle to also install the vulkan runtime ('vulkan-1.dll'), if true. | false | false |
 
 ### Outputs
 
 The following output variables are available:
 
-| Name             | Type    | Description                           |
-|------------------|---------|---------------------------------------|
-| `VULKAN_VERSION` | String  | The installed Vulkan SDK version.     |
-| `VULKAN_SDK`     | String  | The location of your Vulkan SDK files |
+| Name               | Type    | Description                           |
+|--------------------|---------|---------------------------------------|
+| `VULKAN_VERSION`   | String  | The installed Vulkan SDK version.     |
+| `VULKAN_SDK`       | String  | The location of your Vulkan SDK files |
 
 ### Environment Variables
 
 The following environment variables are set:
 
 | Name            | Type    | Default      | Description                                    |
-|-----------------|---------|-------------|-------------------------------------------------|
-| `VULKAN_SDK` | String  | `~/.default_value` | The location of your Vulkan SDK files  |
+|-----------------|---------|--------------|------------------------------------------------|
+| `VULKAN_SDK`    | String  | `~/.default_value` | The location of your Vulkan SDK files  |
 
 ## Keep up-to-date with GitHub Dependabot
 
