@@ -78,7 +78,7 @@ You can find all Inputs and Outputs and their default settings in the [action.ym
 
 ### Inputs
 
-The following inputs can be used as `step.with` keys:
+The following inputs can be used as `steps.with` keys:
 
 | Name               | Type    | Description                       |
 |--------------------|---------|-----------------------------------|
