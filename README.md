@@ -16,9 +16,9 @@ ___
 * [Usage](#usage)
   * [Quick start](#quick-start)
 * [Customizing](#customizing)
-  * [inputs](#inputs)
-  * [outputs](#outputs)
-  * [environment variables](#environment-variables)
+  * [Inputs](#inputs)
+  * [Outputs](#outputs)
+  * [Environment variables](#environment-variables)
 * [Keep up-to-date with GitHub Dependabot](#keep-up-to-date-with-github-dependabot)
 * [License](#license)
 
@@ -30,6 +30,7 @@ ___
 - Vulkan SDK: <https://vulkan.lunarg.com/>
 - Vulkan SDK Docs: <https://vulkan.lunarg.com/doc/sdk/>
 - Vulkan Tools: <https://vulkan.org/tools>
+- Vulkan SDK Version Query and Download API: <https://vulkan.lunarg.com/content/view/latest-sdk-version-api>
 
 ### What is Vulkan?
 
@@ -46,10 +47,6 @@ ___
 > - Third-party libraries such as [GLM](https://github.com/g-truc/glm) and [SDL](https://www.libsdl.org/).
 >
 > -- <cite>https://vulkan.lunarg.com/doc/sdk/latest/windows/getting_started.html</cite>
-
-### Vulkan SDK Version Query and Download API
-
-https://vulkan.lunarg.com/content/view/latest-sdk-version-api
 
 ## Usage
 
