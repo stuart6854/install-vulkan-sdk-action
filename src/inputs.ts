@@ -5,8 +5,8 @@ import * as version_getter from './versiongetter'
 export interface Inputs {
   version: string
   destination: string
-  //cache: boolean
   install_runtime: boolean
+  use_cache: boolean
   //optional_components: string[]
 }
 
@@ -14,8 +14,8 @@ export async function getInputs(): Promise<Inputs> {
   return {
     version: await getInputVersion(core.getInput('version', {required: false})),
     destination: await getInputDestination(core.getInput('destination', {required: false})),
-    //cache: /true/i.test(core.getInput('cache', {required: false})),
-    install_runtime: /true/i.test(core.getInput('install_runtime', {required: false}))
+    install_runtime: /true/i.test(core.getInput('install_runtime', {required: false})),
+    use_cache: /true/i.test(core.getInput('cache', {required: false}))
     //optional_components: await getInputOptionalComponents(core.getInput('optional_components', {required: false}))
   }
 }
@@ -48,16 +48,19 @@ function validateVersion(version: string): boolean {
 }
 
 async function getInputDestination(destination: string): Promise<string> {
-  // if location wasn't specified, use default install location for platform
+  // if location wasn't specified, return default install location for platform
   if (!destination || destination === '') {
     if (platform.IS_WINDOWS) {
       return 'C:\\VulkanSDK'
     }
+    // The .tar.gz file now simply extracts the SDK into a directory of the form 1.x.yy.z.
+    // The official docs install into the "~" ($HOME) folder.
     if (platform.IS_LINUX) {
-      return ''
+      return `${platform.HOME_DIR}/vulkan-sdk`
     }
+    // The macOS SDK is intended to be installed anywhere the user can place files such as the user's $HOME directory.
     if (platform.IS_MAC) {
-      return ''
+      return `${platform.HOME_DIR}/vulkan-sdk`
     }
   }
 

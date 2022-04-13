@@ -4,14 +4,22 @@ import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
 import {exec} from '@actions/exec'
 
-export async function install_vulkan_sdk(sdk_installer_filepath: string, destination: string): Promise<string> {
-  if (platform.IS_LINUX || platform.IS_MAC) {
-    await exec('chmod', ['+x', sdk_installer_filepath])
-  }
+export async function install_vulkan_sdk(
+  sdk_installer_filepath: string,
+  destination: string,
+  version: string
+): Promise<string> {
   let install_path = ''
+
+  if (platform.IS_MAC) {
+  }
+
   if (platform.IS_LINUX) {
     install_path = await extract_archive(sdk_installer_filepath, destination)
+    const cachedPath = await tc.cacheDir(install_path, 'vulkan_sdk', version, platform.OS_ARCH)
+    core.addPath(cachedPath)
   }
+
   if (platform.IS_WINDOWS) {
     // TODO allow installing optional components
     // --confirm-command install com.lunarg.vulkan.32bit
@@ -41,21 +49,9 @@ export async function install_vulkan_runtime(runtime_archive_filepath: string, d
   return install_path
 }
 
-async function extract_archive(archivePath: string, destination: string): Promise<string> {
-  if (platform.IS_WINDOWS) {
-    return await tc.extractZip(archivePath, destination)
-  } else {
-    return await tc.extractTar(archivePath, destination)
-  }
-}
-
-export async function verify_installation(sdk_path: string): Promise<number> {
-  let exitCode
-  exitCode = await verify_installation_of_sdk(sdk_path)
-  if (platform.IS_WINDOWS) {
-    exitCode = exitCode && verify_installation_of_runtime(sdk_path)
-  }
-  return exitCode
+async function extract_archive(archive: string, destination: string): Promise<string> {
+  const extract = archive.endsWith('.zip') ? tc.extractZip : tc.extractTar
+  return await extract(archive, destination)
 }
 
 async function verify_installation_of_sdk(sdk_path?: string): Promise<number> {

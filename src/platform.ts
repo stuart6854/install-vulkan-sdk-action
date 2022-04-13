@@ -1,5 +1,7 @@
 import * as os from 'os'
 
+export const HOME_DIR: string = os.homedir() // $HOME
+
 export const OS_PLATFORM: string = os.platform() // linux, mac, win32
 export const OS_ARCH: string = os.arch()
 

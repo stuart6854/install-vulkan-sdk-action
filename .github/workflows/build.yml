@@ -42,7 +42,7 @@ jobs:
         config:
           # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
           - { OS: windows-2022 }
-          - { OS: ubuntu-latest }
+          - { OS: ubuntu-latest  }
 
     steps:
 
@@ -56,3 +56,11 @@ jobs:
           # should say version not available
           # should print list of valid versions
           #version: 1.2.189.1
+
+      - run: echo vulkan-version=${{ steps.install-vulkan-sdk-action.outputs.vulkan-version }}
+
+      - run: echo $PATH
+
+      - run: echo $VULKAN_VERSION
+
+      - run: echo $VULKAN_SDK
