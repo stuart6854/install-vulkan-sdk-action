@@ -5,8 +5,11 @@ node_modules
 __tests__/runner/*
 lib/**/*
 
-# Action temp folder
+# temp folder
 tmp/*
+
+# default installation folder of this action
+third-party/
 
 # OS metadata
 .DS_Store
