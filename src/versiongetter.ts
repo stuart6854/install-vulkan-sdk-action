@@ -46,9 +46,9 @@ export const getLatestVersions = async (): Promise<LatestVersionResponse | null>
   return response.result
 }
 
-// this function resovles the string "latest" version to it's lasest version number.
-// "latest" is set as version during input validation, when the version field is empty.
-// in the end, the version to download is either
+// This function resolves the string "latest" version the latest version number.
+// "latest" as a string is set during input validation, when the version field is empty.
+// The version to download is either
 //    a) a manually passed in version
 // or b) the automatically resolved latest version for the platform.
 export async function determine_version_to_download(version: string): Promise<string> {
