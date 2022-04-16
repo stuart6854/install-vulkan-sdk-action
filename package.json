@@ -14,7 +14,7 @@
     "test": "jest",
     "test-cov": "jest --coverage",
     "audit": "npm audit --audit-level=high",
-    "all": "npm run build && npm run format && npm run audit && npm run package && npm test"
+    "all": "npm run format && npm run build && npm run audit && npm run package && npm test"
   },
   "keywords": [
     "actions",
