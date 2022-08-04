@@ -20,7 +20,7 @@ export async function getInputs(): Promise<Inputs> {
   }
 }
 
-async function getInputVersion(version: string): Promise<string> {
+export async function getInputVersion(version: string): Promise<string> {
   let requestedVersion: string = version
 
   // throw error, if requestedVersion is a crappy version number
@@ -41,7 +41,7 @@ async function getInputVersion(version: string): Promise<string> {
   return requestedVersion
 }
 
-function validateVersion(version: string): boolean {
+export function validateVersion(version: string): boolean {
   if (version === 'latest') return true
   const re = /^\d+\.\d+\.\d+\.\d+$/
   return re.test(version)
@@ -81,11 +81,14 @@ export async function getInputOptionalComponents(optional_components: string): P
   const invalid_input_components = input_components.filter(
     item => optional_components_allowlist.includes(item) === false
   )
-  core.info(`Please remove the following invalid optional_components: ${invalid_input_components}!`)
+  core.info(`Please remove the following invalid optional_components: ${invalid_input_components}`)
 
   const valid_input_components = input_components.filter(item => optional_components_allowlist.includes(item) === true)
-  if (valid_input_components) {
-    core.info(`Installing Optional Components: ${valid_input_components}.`)
+
+  if (valid_input_components.length == 0) {
+    core.info(`Installing Optional Components: NONE`)
+  } else {
+    core.info(`Installing Optional Components: ${valid_input_components}`)
   }
 
   return valid_input_components

@@ -12,6 +12,7 @@ export async function install_vulkan_sdk(
   let install_path = ''
 
   if (platform.IS_MAC) {
+    // TODO
   }
 
   if (platform.IS_LINUX) {

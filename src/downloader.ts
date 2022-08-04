@@ -5,11 +5,15 @@ import * as path from 'path'
 import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
 
-// return download object with version and url
+// Returns a download object with version and url
+// The url is already checked, if available (HTTP 200).
 export async function get_url_vulkan_sdk(version: string): Promise<string> {
   const platformName = platform.getPlatform()
 
   // for download urls see https://vulkan.lunarg.com/sdk/home
+
+  // Latest Version:
+  // Windows: https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-sdk.exe
 
   const DOWNLOAD_BASE_URL = `https://sdk.lunarg.com/sdk/download/${version}/${platformName}`
 
@@ -52,22 +56,22 @@ async function is_downloadable(name: string, version: string, url: string) {
 export async function download_vulkan_sdk(version: string): Promise<string> {
   const url = await get_url_vulkan_sdk(version)
   core.info(`🔽 Downloading Vulkan SDK ${version}`)
-  const sdk_download_path = await tc.downloadTool(url)
+  const sdk_path = await tc.downloadTool(url)
   core.info(`✔️ Downloaded successfull!`)
-  core.info(`Path to installer file: ${sdk_download_path}`)
-  return sdk_download_path
+  core.info(`Path to installer file: ${sdk_path}`)
+  return sdk_path
 }
 
 export async function download_vulkan_runtime(version: string): Promise<string> {
   const url = await get_url_vulkan_runtime(version)
   core.info(`🔽 Downloading Vulkan Runtime ${version}`)
-  const runtime_download_path = await tc.downloadTool(url)
+  const runtime_path = await tc.downloadTool(url)
   core.info(`✔️ Downloaded successfull!`)
-  core.info(`Path to runtime file: ${runtime_download_path}`)
-  return runtime_download_path
+  core.info(`Path to runtime file: ${runtime_path}`)
+  return runtime_path
 }
 
-function get_non_versionized_filename_vulkan_sdk(): string {
+export function get_non_versionized_filename_vulkan_sdk(): string {
   if (platform.IS_WINDOWS) {
     return `VulkanSDK-Installer.exe`
   }
@@ -81,6 +85,6 @@ function get_non_versionized_filename_vulkan_sdk(): string {
 }
 
 // return the platform-based (windows-only) versionized filename
-function get_versionized_filename_vulkan_runtime(version: string): string {
+export function get_versionized_filename_vulkan_runtime(version: string): string {
   return `vulkan-runtime-components-${version}.zip`
 }

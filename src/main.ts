@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as downloader from './downloader'
 import * as input from './inputs'
 import * as installer from './installer'
+import * as path from 'path'
 import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
 import * as cache from '@actions/cache'
@@ -18,63 +19,50 @@ function show_cache(): void {
   core.info(`🔎 Show Cache`)
   const cachedVersions = tc.findAllVersions('vulkan_sdk', platform.OS_ARCH)
   if (cachedVersions.length !== 0) {
-    core.info(`🎯 Cached versions of vulkan_sdk available: ${cachedVersions}`)
+    core.info(`🎯 Cached versions of Vulkan SDK available: ${cachedVersions}`)
   }
 }
 
-async function find_in_cache_vulkan_sdk(version: string): Promise<string> {
-  return tc.find('vulkan_sdk', version, platform.OS_ARCH)
-}
-
-async function download_vulkan_sdk(version: string): Promise<string> {
-  return await downloader.download_vulkan_sdk(version)
-}
-
-async function get_vulkan_sdk(version: string, use_cache: boolean): Promise<string> {
+async function get_vulkan_sdk(version: string, destination: string, use_cache: boolean): Promise<string> {
   if (use_cache) {
     show_cache()
-    let cached_sdk = await find_in_cache_vulkan_sdk(version)
-    if (cached_sdk) {
-      core.info(`🎯 Found cached Vulkan SDK in path: ${cached_sdk}`)
-      // path.resolve(path.join(cached_sdk, 'vulkan-sdk')
-      core.addPath(cached_sdk)
-      return cached_sdk
+    let cached_install_path = tc.find('vulkan_sdk', version, platform.OS_ARCH)
+    if (cached_install_path) {
+      core.info(`🎯 Found cached Vulkan SDK in path: ${cached_install_path}`)
+      // path.resolve(path.join(cached_install_path, 'vulkan-sdk')
+      core.addPath(cached_install_path)
+      return cached_install_path
     }
   }
-  return await download_vulkan_sdk(version)
+  const vulkan_sdk_path = await downloader.download_vulkan_sdk(version)
+  const install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, version)
+  return install_path
 }
 
-async function find_in_cache_vulkan_runtime(version: string): Promise<string> {
-  return tc.find('vulkan_runtime', version, platform.OS_ARCH)
-}
-
-async function download_vulkan_runtime(version: string): Promise<string> {
-  return await downloader.download_vulkan_runtime(version)
-}
-
-async function get_vulkan_runtime(version: string, use_cache: boolean): Promise<string> {
+async function get_vulkan_runtime(version: string, destination: string, use_cache: boolean): Promise<string> {
   if (use_cache) {
-    let cached_runtime = await find_in_cache_vulkan_runtime(version)
-    if (cached_runtime) {
-      core.info(`🎯 Found cached Vulkan SDK in path: ${cached_runtime}`)
-      // path.resolve(path.join(cached_runtime, 'vulkan-runtime')
-      core.addPath(cached_runtime)
-      return cached_runtime
+    let cached_install_path = tc.find('vulkan_runtime', version, platform.OS_ARCH)
+    if (cached_install_path) {
+      core.addPath(cached_install_path)
+      core.info(`🎯 Found cached Vulkan SDK '${version}' in path: ${cached_install_path}`)
+      return cached_install_path
     }
   }
-  return await download_vulkan_runtime(version)
+  const runtime_archive_path = await downloader.download_vulkan_runtime(version)
+  const install_path = await installer.install_vulkan_runtime(runtime_archive_path, destination)
+  return install_path
 }
 
 async function run(): Promise<void> {
   try {
     const inputs: input.Inputs = await input.getInputs()
 
-    const version = await version_getter.determine_version_to_download(inputs.version)
+    const version = await version_getter.resolve_version(inputs.version)
 
-    /*const sdk_installer_path = await get_vulkan_sdk(version, inputs.use_cache)
+    const sdk_installer_path = await get_vulkan_sdk(version, inputs.destination, inputs.use_cache)
 
     const installation_path = await installer.install_vulkan_sdk(sdk_installer_path, inputs.destination, version)
-
+    /*
     core.addPath(`${installation_path}`)
     core.info(`✔️ [PATH] Added path to Vulkan SDK to environment variable PATH.`)
 
@@ -87,8 +75,9 @@ async function run(): Promise<void> {
     core.setOutput('VULKAN_VERSION', version)*/
 
     if (inputs.install_runtime /*&& platform.IS_WINDOWS*/) {
-      const runtime_archive_path = await get_vulkan_runtime(version, inputs.use_cache)
-      const installation_path = await installer.install_vulkan_runtime(runtime_archive_path, inputs.destination)
+      const install_path = await get_vulkan_runtime(version, inputs.destination, inputs.use_cache)
+
+      core.info(`✔️ [INFO] Path to Vulkan Runtime: ${install_path}`)
     }
   } catch (error: any) {
     let errorMessage = 'ErrorMessage'
@@ -100,6 +89,3 @@ async function run(): Promise<void> {
 }
 
 run()
-function get_VulkanSDK() {
-  throw new Error('Function not implemented.')
-}

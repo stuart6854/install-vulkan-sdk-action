@@ -46,12 +46,12 @@ export const getLatestVersions = async (): Promise<LatestVersionResponse | null>
   return response.result
 }
 
-// This function resolves the string "latest" version the latest version number.
-// "latest" as a string is set during input validation, when the version field is empty.
+// This function resolves the string literal "latest" to the latest version number.
+// "latest" might be set by the user or during input validation, when the version field is empty.
 // The version to download is either
-//    a) a manually passed in version
+//    a) a manually passed in version (pass-through)
 // or b) the automatically resolved latest version for the platform.
-export async function determine_version_to_download(version: string): Promise<string> {
+export async function resolve_version(version: string): Promise<string> {
   let versionToDownload: string = version
   if (version === 'latest') {
     try {
@@ -61,7 +61,7 @@ export async function determine_version_to_download(version: string): Promise<st
         core.info(`Latest Version: ${versionToDownload}`)
       }
     } catch (error) {
-      let errorMessage = 'Failed to do something exceptional'
+      let errorMessage = 'Failed to resolve_version()'
       if (error instanceof Error) {
         errorMessage = error.message
       }
