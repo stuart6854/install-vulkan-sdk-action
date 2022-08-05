@@ -30,18 +30,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.get_versionized_filename_vulkan_runtime = exports.get_non_versionized_filename_vulkan_sdk = exports.download_vulkan_runtime = exports.download_vulkan_sdk = exports.get_url_vulkan_runtime = exports.get_url_vulkan_sdk = void 0;
+exports.get_vulkan_sdk_filename = exports.download_vulkan_runtime = exports.download_vulkan_sdk = exports.get_url_vulkan_runtime = exports.get_url_vulkan_sdk = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const http = __importStar(__nccwpck_require__(270));
+const path = __importStar(__nccwpck_require__(17));
 const platform = __importStar(__nccwpck_require__(238));
-const tc = __importStar(__nccwpck_require__(784));
-// Returns a download object with version and url
+const tc = __importStar(__nccwpck_require__(784)); // https://github.com/actions/toolkit/tree/main/packages/tool-cache
+// Returns the download url
 // The url is already checked, if available (HTTP 200).
 async function get_url_vulkan_sdk(version) {
     const platformName = platform.getPlatform();
-    // for download urls see https://vulkan.lunarg.com/sdk/home
-    // Latest Version:
-    // Windows: https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-sdk.exe
+    // For download urls see https://vulkan.lunarg.com/sdk/home
+    // Windows:
+    // Latest Version: https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-sdk.exe
+    // Versionized:    https://sdk.lunarg.com/sdk/download/1.3.216.0/windows/VulkanSDK-1.3.216.0-Installer.exe
     const DOWNLOAD_BASE_URL = `https://sdk.lunarg.com/sdk/download/${version}/${platformName}`;
     let VULKAN_SDK_URL = '';
     if (platform.IS_WINDOWS) {
@@ -59,41 +61,51 @@ async function get_url_vulkan_sdk(version) {
 exports.get_url_vulkan_sdk = get_url_vulkan_sdk;
 // vulkan-runtime-components is a windows specific download shipping "vulkan-1.dll" for x86 and x64.
 async function get_url_vulkan_runtime(version) {
+    // Windows:
+    // Latest Version:  https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime-components.zip
+    // Versionized:     https://sdk.lunarg.com/sdk/download/1.3.216.0/windows/VulkanRT-1.3.216.0-Components.zip
     const VULKAN_RUNTIME_URL = `https://sdk.lunarg.com/sdk/download/${version}/windows/vulkan-runtime-components.zip`;
     is_downloadable('VULKAN_RUNTIME', version, VULKAN_RUNTIME_URL);
     return VULKAN_RUNTIME_URL;
 }
 exports.get_url_vulkan_runtime = get_url_vulkan_runtime;
 async function is_downloadable(name, version, url) {
-    // test, if URL is downloadable
-    const statusCode = (await http.client.head(url)).message.statusCode;
-    //if (statusCode !== 200) {
-    if (statusCode !== undefined && statusCode >= 400) {
-        const errorMessage = `❌ ${name} was not found for version: ${version} using URL: ${url}`;
-        core.setFailed(errorMessage);
-        throw new Error(errorMessage);
+    try {
+        const HttpClientResponse = await http.client.head(url);
+        const statusCode = HttpClientResponse.message.statusCode;
+        if (statusCode !== undefined && statusCode >= 400) {
+            throw new Error(`❌ ${name} version not found: ${version} using URL: ${url}`);
+        }
+        core.info(`✔️ The requested ${name} version was found: ${version}`);
     }
-    core.info(`✔️ The requested ${name} version was found: ${version}`);
+    catch (error) {
+        if (error instanceof Error) {
+            core.setFailed(error.message);
+        }
+    }
 }
 async function download_vulkan_sdk(version) {
-    const url = await get_url_vulkan_sdk(version);
     core.info(`🔽 Downloading Vulkan SDK ${version}`);
-    const sdk_path = await tc.downloadTool(url);
-    core.info(`✔️ Downloaded successful!`);
-    core.info(`Path to installer file: ${sdk_path}`);
+    const url = await get_url_vulkan_sdk(version);
+    core.info(`    URL: ${url}`);
+    const sdk_path = await tc.downloadTool(url, path.join(platform.TEMP_DIR, get_vulkan_sdk_filename()));
+    core.info(`✔️ Download completed successfully!`);
+    core.info(`   File: ${sdk_path}`);
     return sdk_path;
 }
 exports.download_vulkan_sdk = download_vulkan_sdk;
+// windows only
 async function download_vulkan_runtime(version) {
-    const url = await get_url_vulkan_runtime(version);
     core.info(`🔽 Downloading Vulkan Runtime ${version}`);
-    const runtime_path = await tc.downloadTool(url);
-    core.info(`✔️ Downloaded successful!`);
-    core.info(`Path to runtime file: ${runtime_path}`);
+    const url = await get_url_vulkan_runtime(version);
+    core.info(`   URL: ${url}`);
+    const runtime_path = await tc.downloadTool(url, path.join(platform.TEMP_DIR, `vulkan-runtime-components.zip`));
+    core.info(`✔️ Download completed successfully!`);
+    core.info(`    File: ${runtime_path}`);
     return runtime_path;
 }
 exports.download_vulkan_runtime = download_vulkan_runtime;
-function get_non_versionized_filename_vulkan_sdk() {
+function get_vulkan_sdk_filename() {
     if (platform.IS_WINDOWS) {
         return `VulkanSDK-Installer.exe`;
     }
@@ -103,14 +115,9 @@ function get_non_versionized_filename_vulkan_sdk() {
     if (platform.IS_MAC) {
         return `vulkansdk-macos.dmg`;
     }
-    return '';
+    return 'not-implemented-for-platform';
 }
-exports.get_non_versionized_filename_vulkan_sdk = get_non_versionized_filename_vulkan_sdk;
-// return the platform-based (windows-only) versionized filename
-function get_versionized_filename_vulkan_runtime(version) {
-    return `vulkan-runtime-components-${version}.zip`;
-}
-exports.get_versionized_filename_vulkan_runtime = get_versionized_filename_vulkan_runtime;
+exports.get_vulkan_sdk_filename = get_vulkan_sdk_filename;
 //# sourceMappingURL=downloader.js.map
 
 /***/ }),
@@ -224,18 +231,19 @@ async function getInputDestination(destination) {
     // if location wasn't specified, return default install location for platform
     if (!destination || destination === '') {
         if (platform.IS_WINDOWS) {
-            return 'C:\\VulkanSDK';
+            destination = 'C:\\VulkanSDK';
         }
         // The .tar.gz file now simply extracts the SDK into a directory of the form 1.x.yy.z.
         // The official docs install into the "~" ($HOME) folder.
         if (platform.IS_LINUX) {
-            return `${platform.HOME_DIR}/vulkan-sdk`;
+            destination = `${platform.HOME_DIR}/vulkan-sdk`;
         }
         // The macOS SDK is intended to be installed anywhere the user can place files such as the user's $HOME directory.
         if (platform.IS_MAC) {
-            return `${platform.HOME_DIR}/vulkan-sdk`;
+            destination = `${platform.HOME_DIR}/vulkan-sdk`;
         }
     }
+    core.info(`Destination: ${destination}`);
     return destination;
 }
 // https://vulkan.lunarg.com/doc/view/latest/windows/getting_started.html#user-content-installing-optional-components
@@ -248,13 +256,15 @@ async function getInputOptionalComponents(optional_components) {
     ];
     const input_components = optional_components.split(',').map((item) => item.trim());
     const invalid_input_components = input_components.filter(item => optional_components_allowlist.includes(item) === false);
-    core.info(`Please remove the following invalid optional_components: ${invalid_input_components}`);
+    if (invalid_input_components.length > 0) {
+        core.info(`❌ Please remove the following invalid optional_components: ${invalid_input_components}`);
+    }
     const valid_input_components = input_components.filter(item => optional_components_allowlist.includes(item) === true);
     if (valid_input_components.length == 0) {
-        core.info(`Installing Optional Components: NONE`);
+        core.info(`❌ Installing Optional Components: NONE`);
     }
     else {
-        core.info(`Installing Optional Components: ${valid_input_components}`);
+        core.info(`✔️ Installing Optional Components: ${valid_input_components}`);
     }
     return valid_input_components;
 }
@@ -298,13 +308,15 @@ const fs = __importStar(__nccwpck_require__(147));
 const platform = __importStar(__nccwpck_require__(238));
 const tc = __importStar(__nccwpck_require__(784));
 const exec_1 = __nccwpck_require__(514);
-async function install_vulkan_sdk(sdk_installer_filepath, destination, version) {
+async function install_vulkan_sdk(sdk_path, destination, version) {
     let install_path = '';
+    core.info(`📦 Extracting Vulkan SDK...`);
+    core.info(`    File: ${sdk_path}`);
     if (platform.IS_MAC) {
         // TODO
     }
     if (platform.IS_LINUX) {
-        install_path = await extract_archive(sdk_installer_filepath, destination);
+        install_path = await extract_archive(sdk_path, destination);
         const cachedPath = await tc.cacheDir(install_path, 'vulkan_sdk', version, platform.OS_ARCH);
         core.addPath(cachedPath);
     }
@@ -314,7 +326,7 @@ async function install_vulkan_sdk(sdk_installer_filepath, destination, version) 
         //                           com.lunarg.vulkan.thirdparty
         //                           com.lunarg.vulkan.debug
         //                           com.lunarg.vulkan.debug32
-        const exitCode = await (0, exec_1.exec)(sdk_installer_filepath, [
+        const exitCode = await (0, exec_1.exec)(sdk_path, [
             '--root',
             destination,
             '--accept-licenses',
@@ -338,9 +350,26 @@ async function install_vulkan_runtime(runtime_archive_filepath, destination) {
     return install_path;
 }
 exports.install_vulkan_runtime = install_vulkan_runtime;
-async function extract_archive(archive, destination) {
-    const extract = archive.endsWith('.zip') ? tc.extractZip : tc.extractTar;
-    return await extract(archive, destination);
+async function extract_archive(file, destination) {
+    const extract = tc.extractTar;
+    if (platform.IS_WINDOWS) {
+        if (file.endsWith('.exe')) {
+            return destination;
+        }
+        else if (file.endsWith('.zip')) {
+            const extract = tc.extractZip;
+        }
+        else if (file.endsWith('.7z')) {
+            const extract = tc.extract7z;
+        }
+    }
+    else if (platform.IS_MAC) {
+        const extract = tc.extractXar;
+    }
+    else {
+        const extract = tc.extractTar;
+    }
+    return await extract(file, destination);
 }
 async function verify_installation_of_sdk(sdk_path) {
     let exitCode = 1;
@@ -416,50 +445,50 @@ function show_cache() {
     }
 }
 async function get_vulkan_sdk(version, destination, use_cache) {
+    let install_path;
+    let ver = await version_getter.resolve_version(version);
     if (use_cache) {
         show_cache();
-        let cached_install_path = tc.find('vulkan_sdk', version, platform.OS_ARCH);
-        if (cached_install_path) {
-            core.info(`🎯 Found cached Vulkan SDK in path: ${cached_install_path}`);
-            // path.resolve(path.join(cached_install_path, 'vulkan-sdk')
-            core.addPath(cached_install_path);
-            return cached_install_path;
+        install_path = tc.find('vulkan_sdk', ver, platform.OS_ARCH);
+        if (install_path) {
+            core.info(`🎯 Found cached Vulkan SDK '${ver}' in path: ${install_path}`);
+            core.addPath(install_path);
+            return install_path;
         }
     }
-    const vulkan_sdk_path = await downloader.download_vulkan_sdk(version);
-    const install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, version);
+    const vulkan_sdk_path = await downloader.download_vulkan_sdk(ver);
+    install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, ver);
     return install_path;
 }
 async function get_vulkan_runtime(version, destination, use_cache) {
+    let install_path;
+    let ver = await version_getter.resolve_version(version);
     if (use_cache) {
-        let cached_install_path = tc.find('vulkan_runtime', version, platform.OS_ARCH);
-        if (cached_install_path) {
-            core.addPath(cached_install_path);
-            core.info(`🎯 Found cached Vulkan SDK '${version}' in path: ${cached_install_path}`);
-            return cached_install_path;
+        show_cache();
+        install_path = tc.find('vulkan_runtime', ver, platform.OS_ARCH);
+        if (install_path) {
+            core.info(`🎯 Found cached Vulkan Runtime '${ver}' in path: ${install_path}`);
+            core.addPath(install_path);
+            return install_path;
         }
     }
-    const runtime_archive_path = await downloader.download_vulkan_runtime(version);
-    const install_path = await installer.install_vulkan_runtime(runtime_archive_path, destination);
+    const vulkan_runtime_path = await downloader.download_vulkan_runtime(ver);
+    install_path = await installer.install_vulkan_runtime(vulkan_runtime_path, destination);
     return install_path;
 }
 async function run() {
     try {
         const inputs = await input.getInputs();
         const version = await version_getter.resolve_version(inputs.version);
-        const sdk_installer_path = await get_vulkan_sdk(version, inputs.destination, inputs.use_cache);
-        const installation_path = await installer.install_vulkan_sdk(sdk_installer_path, inputs.destination, version);
-        /*
-        core.addPath(`${installation_path}`)
-        core.info(`✔️ [PATH] Added path to Vulkan SDK to environment variable PATH.`)
-    
-        core.exportVariable('VULKAN_SDK', `${installation_path}`)
-        core.info(`✔️ [VULKAN_SDK] Added environment variable VULKAN_SDK -> "${installation_path}".`)
-    
-        core.exportVariable('VULKAN_VERSION', `${version}`)
-        core.info(`✔️ [VULKAN_VERSION] Added environment variable VULKAN_VERSION -> "${version}".`)
-    
-        core.setOutput('VULKAN_VERSION', version)*/
+        const sdk_path = await get_vulkan_sdk(version, inputs.destination, inputs.use_cache);
+        const sdk_versionized_path = `${sdk_path}/${version}`;
+        core.addPath(`${sdk_versionized_path}`);
+        core.info(`✔️ [PATH] Added path to Vulkan SDK to environment variable PATH.`);
+        core.exportVariable('VULKAN_SDK', `${sdk_versionized_path}`);
+        core.info(`✔️ [ENV] Set env variable VULKAN_SDK -> "${sdk_versionized_path}".`);
+        core.exportVariable('VULKAN_VERSION', `${version}`);
+        core.info(`✔️ [ENV] Set env variable VULKAN_VERSION -> "${version}".`);
+        core.setOutput('VULKAN_VERSION', version);
         if (inputs.install_runtime /*&& platform.IS_WINDOWS*/) {
             const install_path = await get_vulkan_runtime(version, inputs.destination, inputs.use_cache);
             core.info(`✔️ [INFO] Path to Vulkan Runtime: ${install_path}`);
@@ -507,7 +536,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getPlatform = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = exports.OS_ARCH = exports.OS_PLATFORM = exports.HOME_DIR = void 0;
+exports.getPlatform = exports.TEMP_DIR = exports.IS_MAC = exports.IS_LINUX = exports.IS_WINDOWS = exports.OS_ARCH = exports.OS_PLATFORM = exports.HOME_DIR = void 0;
 const os = __importStar(__nccwpck_require__(37));
 exports.HOME_DIR = os.homedir(); // $HOME
 exports.OS_PLATFORM = os.platform(); // linux, mac, win32
@@ -515,6 +544,7 @@ exports.OS_ARCH = os.arch();
 exports.IS_WINDOWS = exports.OS_PLATFORM === 'win32';
 exports.IS_LINUX = exports.OS_PLATFORM === 'linux';
 exports.IS_MAC = exports.OS_PLATFORM === 'darwin';
+exports.TEMP_DIR = os.tmpdir();
 // this needs to return a platform name, which can be used as part of the URLs
 function getPlatform() {
     if (exports.IS_WINDOWS) {

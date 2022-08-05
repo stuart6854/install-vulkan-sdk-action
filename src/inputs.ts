@@ -51,18 +51,20 @@ async function getInputDestination(destination: string): Promise<string> {
   // if location wasn't specified, return default install location for platform
   if (!destination || destination === '') {
     if (platform.IS_WINDOWS) {
-      return 'C:\\VulkanSDK'
+      destination = 'C:\\VulkanSDK'
     }
     // The .tar.gz file now simply extracts the SDK into a directory of the form 1.x.yy.z.
     // The official docs install into the "~" ($HOME) folder.
     if (platform.IS_LINUX) {
-      return `${platform.HOME_DIR}/vulkan-sdk`
+      destination = `${platform.HOME_DIR}/vulkan-sdk`
     }
     // The macOS SDK is intended to be installed anywhere the user can place files such as the user's $HOME directory.
     if (platform.IS_MAC) {
-      return `${platform.HOME_DIR}/vulkan-sdk`
+      destination = `${platform.HOME_DIR}/vulkan-sdk`
     }
   }
+
+  core.info(`Destination: ${destination}`)
 
   return destination
 }
@@ -81,14 +83,16 @@ export async function getInputOptionalComponents(optional_components: string): P
   const invalid_input_components = input_components.filter(
     item => optional_components_allowlist.includes(item) === false
   )
-  core.info(`Please remove the following invalid optional_components: ${invalid_input_components}`)
+  if (invalid_input_components.length > 0) {
+    core.info(`❌ Please remove the following invalid optional_components: ${invalid_input_components}`)
+  }
 
   const valid_input_components = input_components.filter(item => optional_components_allowlist.includes(item) === true)
 
   if (valid_input_components.length == 0) {
-    core.info(`Installing Optional Components: NONE`)
+    core.info(`❌ Installing Optional Components: NONE`)
   } else {
-    core.info(`Installing Optional Components: ${valid_input_components}`)
+    core.info(`✔️ Installing Optional Components: ${valid_input_components}`)
   }
 
   return valid_input_components

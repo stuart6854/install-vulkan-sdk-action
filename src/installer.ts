@@ -4,19 +4,18 @@ import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
 import {exec} from '@actions/exec'
 
-export async function install_vulkan_sdk(
-  sdk_installer_filepath: string,
-  destination: string,
-  version: string
-): Promise<string> {
+export async function install_vulkan_sdk(sdk_path: string, destination: string, version: string): Promise<string> {
   let install_path = ''
+
+  core.info(`📦 Extracting Vulkan SDK...`)
+  core.info(`    File: ${sdk_path}`)
 
   if (platform.IS_MAC) {
     // TODO
   }
 
   if (platform.IS_LINUX) {
-    install_path = await extract_archive(sdk_installer_filepath, destination)
+    install_path = await extract_archive(sdk_path, destination)
     const cachedPath = await tc.cacheDir(install_path, 'vulkan_sdk', version, platform.OS_ARCH)
     core.addPath(cachedPath)
   }
@@ -27,7 +26,7 @@ export async function install_vulkan_sdk(
     //                           com.lunarg.vulkan.thirdparty
     //                           com.lunarg.vulkan.debug
     //                           com.lunarg.vulkan.debug32
-    const exitCode = await exec(sdk_installer_filepath, [
+    const exitCode = await exec(sdk_path, [
       '--root',
       destination,
       '--accept-licenses',
@@ -50,9 +49,22 @@ export async function install_vulkan_runtime(runtime_archive_filepath: string, d
   return install_path
 }
 
-async function extract_archive(archive: string, destination: string): Promise<string> {
-  const extract = archive.endsWith('.zip') ? tc.extractZip : tc.extractTar
-  return await extract(archive, destination)
+async function extract_archive(file: string, destination: string): Promise<string> {
+  const extract = tc.extractTar
+  if (platform.IS_WINDOWS) {
+    if (file.endsWith('.exe')) {
+      return destination
+    } else if (file.endsWith('.zip')) {
+      const extract = tc.extractZip
+    } else if (file.endsWith('.7z')) {
+      const extract = tc.extract7z
+    }
+  } else if (platform.IS_MAC) {
+    const extract = tc.extractXar
+  } else {
+    const extract = tc.extractTar
+  }
+  return await extract(file, destination)
 }
 
 async function verify_installation_of_sdk(sdk_path?: string): Promise<number> {
