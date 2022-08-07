@@ -69,7 +69,6 @@ jobs:
       - name: Show Env Vars and SDK folder
         if: contains(matrix.config.OS, 'windows')
         run: |
-          echo %PATH%
-          echo %VULKAN_VERSION%
-          echo %VULKAN_SDK%
-          dir %VULKAN_SDK%
+          echo $env:PATH
+          echo $env:VULKAN_VERSION
+          echo $env:VULKAN_SDK

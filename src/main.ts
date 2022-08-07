@@ -2,16 +2,17 @@ import * as core from '@actions/core'
 import * as downloader from './downloader'
 import * as input from './inputs'
 import * as installer from './installer'
+import * as path from 'path'
 import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
 import * as version_getter from './versiongetter'
 import * as fs from 'fs'
 
 function show_cache(): void {
-  const testFolder = '/opt/hostedtoolcache/vulkan_sdk'
+  /*const testFolder = path.normalize('/opt/hostedtoolcache/vulkan_sdk')
   fs.readdirSync(testFolder).forEach(file => {
     core.info(file)
-  })
+  })*/
   core.info(`🔎 Show Cache`)
   const cachedVersions = tc.findAllVersions('vulkan_sdk', platform.OS_ARCH)
   if (cachedVersions.length !== 0) {
@@ -61,7 +62,7 @@ async function run(): Promise<void> {
 
     const sdk_path = await get_vulkan_sdk(version, inputs.destination, inputs.use_cache)
 
-    const sdk_versionized_path = `${sdk_path}/${version}`
+    const sdk_versionized_path = path.normalize(`${sdk_path}/${version}`)
 
     core.addPath(`${sdk_versionized_path}`)
     core.info(`✔️ [PATH] Added path to Vulkan SDK to environment variable PATH.`)

@@ -2,13 +2,14 @@ import * as core from '@actions/core'
 import * as fs from 'fs'
 import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
-import {exec} from '@actions/exec'
+import * as path from 'path'
+//import { exec } from '@actions/exec'
+import {execFileSync, execSync} from 'child_process'
 
 export async function install_vulkan_sdk(sdk_path: string, destination: string, version: string): Promise<string> {
   let install_path = ''
 
   core.info(`📦 Extracting Vulkan SDK...`)
-  core.info(`    File: ${sdk_path}`)
 
   if (platform.IS_MAC) {
     // TODO
@@ -26,25 +27,42 @@ export async function install_vulkan_sdk(sdk_path: string, destination: string, 
     //                           com.lunarg.vulkan.thirdparty
     //                           com.lunarg.vulkan.debug
     //                           com.lunarg.vulkan.debug32
-    const exitCode = await exec(sdk_path, [
+
+    let cmd_args = [
+      //sdk_path,
       '--root',
       destination,
       '--accept-licenses',
       '--default-answer',
-      '--confirm-command install'
-    ])
-    if (exitCode !== 0) {
-      core.setFailed('Failed to run ${sdk_installer_filepath}.')
-    } else {
+      '--confirm-command',
+      'install'
+    ]
+    let install_cmd = cmd_args.join(' ')
+
+    // powershell.exe Start-Process
+    //   -FilePath 'VulkanSDK-1.3.216.0-Installer.exe'
+    //   -Args '--root C:\VulkanSDK --accept-licenses --default-answer --confirm-command install'
+    //   -Verb runas
+
+    try {
+      //const run_as_admin_cmd = `pwsh runas.exe /noprofile /user:Administrator "${install_cmd}"`
+      const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${install_cmd}' -Verb RunAs`
+      //core.info(`Install Command: ${run_as_admin_cmd}`)
+      let stdout: string = execSync(run_as_admin_cmd).toString().trim()
+      process.stdout.write(stdout)
       install_path = destination
+      //TODO CACHE
+      // SEE https://github.com/gitleaks/gitleaks-action/blob/f65dee2ef48e96e7a5a2b775b131c3d81b2e73ea/src/gitleaks.js#L46
+    } catch (error: any) {
+      core.setFailed(`Installer failed: ${install_cmd}`)
     }
   }
-  return install_path
+  return path.normalize(install_path)
 }
 
 export async function install_vulkan_runtime(runtime_archive_filepath: string, destination: string): Promise<string> {
   core.info(`📦 Extracting Vulkan Runtime...`)
-  const runtime_destination = `${destination}/runtime`
+  const runtime_destination = path.normalize(`${destination}/runtime`)
   const install_path = extract_archive(runtime_archive_filepath, runtime_destination)
   return install_path
 }
@@ -67,27 +85,23 @@ async function extract_archive(file: string, destination: string): Promise<strin
   return await extract(file, destination)
 }
 
-async function verify_installation_of_sdk(sdk_path?: string): Promise<number> {
-  let exitCode = 1
-
+function verify_installation_of_sdk(sdk_path?: string): boolean {
+  let r = false
   if (platform.IS_LINUX || platform.IS_MAC) {
-    exitCode = await exec(`${sdk_path}/bin/vulkaninfo`)
-    core.info(`vulkaninfo exitCode: ${exitCode}!`)
+    r = fs.existsSync(`${sdk_path}/bin/vulkaninfo`)
   }
   if (platform.IS_WINDOWS) {
-    exitCode = await exec(`${sdk_path}/bin/vulkaninfoSDK.exe`)
-    core.info(`vulkaninfoSDK.exe exitCode: ${exitCode}!`)
+    const file = path.normalize(`${sdk_path}/bin/vulkaninfoSDK.exe`)
+    r = fs.existsSync(file)
   }
-
-  if (exitCode !== 0) {
-    core.setFailed('Failed to run vulkaninfo.')
-  }
-  return exitCode
+  return r
 }
 
-function verify_installation_of_runtime(sdk_path?: string): number {
+function verify_installation_of_runtime(sdk_path?: string): boolean {
+  let r = false
   if (platform.IS_WINDOWS) {
-    return fs.existsSync(`${sdk_path}/runtime/vulkan-1.dll`) ? 1 : 0
+    const file = path.normalize(`${sdk_path}/runtime/vulkan-1.dll`)
+    r = fs.existsSync(file)
   }
-  return 0
+  return r
 }

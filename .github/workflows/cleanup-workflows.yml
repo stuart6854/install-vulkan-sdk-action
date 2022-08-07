@@ -55,12 +55,12 @@ jobs:
                 });
               }
             }
-      - name: ✂ Remove 30 days old workflows runs
+      - name: ✂ Remove 7 days old workflows runs
         uses: actions/github-script@v6 # https://github.com/actions/github-script
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const days_to_expiration = 30;
+            const days_to_expiration = 7;
             const ms_in_day = 86400000;
             const now = Date.now();
             const pages = 5;
