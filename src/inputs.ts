@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as path from 'path'
 import * as platform from './platform'
 import * as version_getter from './versiongetter'
 
@@ -63,6 +64,8 @@ async function getInputDestination(destination: string): Promise<string> {
       destination = `${platform.HOME_DIR}/vulkan-sdk`
     }
   }
+
+  destination = path.normalize(destination)
 
   core.info(`Destination: ${destination}`)
 

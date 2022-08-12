@@ -1,3 +1,4 @@
+import * as cache from '@actions/cache'
 import * as core from '@actions/core'
 import * as fs from 'fs'
 import * as platform from './platform'
@@ -22,8 +23,7 @@ export async function install_vulkan_sdk(
 
   if (platform.IS_LINUX) {
     install_path = await extract_archive(sdk_path, destination)
-    const cachedPath = await tc.cacheDir(install_path, 'vulkan_sdk', version, platform.OS_ARCH)
-    core.addPath(cachedPath)
+    //const cachedPath = await tc.cacheDir(install_path, 'vulkan_sdk', version, platform.OS_ARCH)
   }
 
   if (platform.IS_WINDOWS) {
@@ -54,16 +54,18 @@ export async function install_vulkan_sdk(
     const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${install_cmd}' -Verb RunAs`
 
     try {
-      let stdout: string = execSync(run_as_admin_cmd).toString().trim()
-      process.stdout.write(stdout)
+      /*let stdout: string = execSync(run_as_admin_cmd).toString().trim()
+      process.stdout.write(stdout)*/
+      execSync(run_as_admin_cmd)
       install_path = destination
-      //TODO CACHE
-      // SEE https://github.com/gitleaks/gitleaks-action/blob/f65dee2ef48e96e7a5a2b775b131c3d81b2e73ea/src/gitleaks.js#L46
     } catch (error: any) {
       core.setFailed(`Installer failed: ${install_cmd}`)
     }
   }
-  return path.normalize(install_path)
+
+  core.addPath(install_path)
+
+  return install_path
 }
 
 export async function install_vulkan_runtime(runtime_archive_filepath: string, destination: string): Promise<string> {
@@ -106,7 +108,7 @@ function verify_installation_of_sdk(sdk_path?: string): boolean {
 function verify_installation_of_runtime(sdk_path?: string): boolean {
   let r = false
   if (platform.IS_WINDOWS) {
-    const file = path.normalize(`${sdk_path}/runtime/vulkan-1.dll`)
+    const file = `${sdk_path}/runtime/vulkan-1.dll`
     r = fs.existsSync(file)
   }
   return r
