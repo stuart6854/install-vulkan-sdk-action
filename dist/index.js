@@ -460,7 +460,7 @@ async function get_vulkan_sdk(version, destination, optional_components, use_cac
         let restoredFromCache = undefined;
         restoredFromCache = await cache.restoreCache([destination], cacheKey);
         if (restoredFromCache !== undefined) {
-            core.info(`🎯 Found cached Vulkan SDK '${ver}' in path: ${destination}`);
+            core.info(`🎯 [Cache] Restored Vulkan SDK '${ver}' in path: ${destination}`);
             core.addPath(destination);
             return destination;
         }
@@ -472,6 +472,7 @@ async function get_vulkan_sdk(version, destination, optional_components, use_cac
     if (use_cache) {
         try {
             await cache.saveCache([install_path], cacheKey);
+            core.info(`🎯 [Cache] Saved Vulkan SDK '${ver}' in path: ${install_path}`);
         }
         catch (error) {
             core.warning(error);
@@ -488,7 +489,7 @@ async function get_vulkan_runtime(version, destination, use_cache) {
         let restoredFromCache = undefined;
         restoredFromCache = await cache.restoreCache([destination], cacheKey);
         if (restoredFromCache !== undefined) {
-            core.info(`🎯 Found cached Vulkan Runtime '${ver}' in path: ${destination}`);
+            core.info(`🎯 [Cache] Restored Vulkan Runtime '${ver}' in path: ${destination}`);
             core.addPath(destination);
             return destination;
         }
@@ -500,6 +501,7 @@ async function get_vulkan_runtime(version, destination, use_cache) {
     if (use_cache) {
         try {
             await cache.saveCache([install_path], cacheKey);
+            core.info(`🎯 [Cache] Saved Vulkan Runtime '${ver}' in path: ${install_path}`);
         }
         catch (error) {
             core.warning(error);

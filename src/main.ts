@@ -25,7 +25,7 @@ async function get_vulkan_sdk(
     let restoredFromCache = undefined
     restoredFromCache = await cache.restoreCache([destination], cacheKey)
     if (restoredFromCache !== undefined) {
-      core.info(`🎯 Found cached Vulkan SDK '${ver}' in path: ${destination}`)
+      core.info(`🎯 [Cache] Restored Vulkan SDK '${ver}' in path: ${destination}`)
       core.addPath(destination)
       return destination
     }
@@ -39,6 +39,7 @@ async function get_vulkan_sdk(
   if (use_cache) {
     try {
       await cache.saveCache([install_path], cacheKey)
+      core.info(`🎯 [Cache] Saved Vulkan SDK '${ver}' in path: ${install_path}`)
     } catch (error: any) {
       core.warning(error)
     }
@@ -58,7 +59,7 @@ async function get_vulkan_runtime(version: string, destination: string, use_cach
     let restoredFromCache = undefined
     restoredFromCache = await cache.restoreCache([destination], cacheKey)
     if (restoredFromCache !== undefined) {
-      core.info(`🎯 Found cached Vulkan Runtime '${ver}' in path: ${destination}`)
+      core.info(`🎯 [Cache] Restored Vulkan Runtime '${ver}' in path: ${destination}`)
       core.addPath(destination)
       return destination
     }
@@ -72,6 +73,7 @@ async function get_vulkan_runtime(version: string, destination: string, use_cach
   if (use_cache) {
     try {
       await cache.saveCache([install_path], cacheKey)
+      core.info(`🎯 [Cache] Saved Vulkan Runtime '${ver}' in path: ${install_path}`)
     } catch (error: any) {
       core.warning(error)
     }
