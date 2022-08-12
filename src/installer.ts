@@ -60,17 +60,17 @@ export async function install_vulkan_sdk(
     }
   }
 
-  core.info(`  Installation folder: ${install_path}`)
+  core.info(`   Installed into folder: ${install_path}`)
 
   core.addPath(install_path)
 
   return install_path
 }
 
-export async function install_vulkan_runtime(runtime_archive_filepath: string, destination: string): Promise<string> {
+export async function install_vulkan_runtime(runtime_path: string, destination: string): Promise<string> {
   core.info(`📦 Extracting Vulkan Runtime (➔ vulkan-1.dll) ...`)
   const runtime_destination = path.normalize(`${destination}/runtime`)
-  const install_path = extract_archive(runtime_archive_filepath, runtime_destination)
+  const install_path = extract_archive(runtime_path, runtime_destination)
   return install_path
 }
 

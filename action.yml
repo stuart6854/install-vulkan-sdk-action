@@ -20,13 +20,16 @@ inputs:
     description: "The Vulkan SDK version to download. Default: latest version."
     required: false
   cache:
-    description: "Enables caching on true. Default: false."
+    description: "Cache the Vulkan installation folder. Default: false."
     required: false
   destination:
-    description: "The installation folder. Default: see ReadMe."
+    description: "The installation folder for the Vulkan SDK. Default: see ReadMe."
     required: false
   optional_components:
     description: "Comma-separated list of components to install. See Readme. Default: Only SDK, no optional components."
+    required: false
+  install_runtime:
+    description: "Windows only. Installs the vulkan runtime (vulkan-1.dll). Default: false."
     required: false
 
 outputs:
@@ -36,7 +39,7 @@ outputs:
     description: "Location of the Vulkan SDK"
 
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'
 
 # TODO     - name: ✂ Reduce VULKAN_SDK size before caching

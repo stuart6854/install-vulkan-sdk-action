@@ -357,15 +357,15 @@ async function install_vulkan_sdk(sdk_path, destination, version, optional_compo
             core.setFailed(`Installer failed: ${install_cmd}`);
         }
     }
-    core.info(`  Installation folder: ${install_path}`);
+    core.info(`   Installed into folder: ${install_path}`);
     core.addPath(install_path);
     return install_path;
 }
 exports.install_vulkan_sdk = install_vulkan_sdk;
-async function install_vulkan_runtime(runtime_archive_filepath, destination) {
+async function install_vulkan_runtime(runtime_path, destination) {
     core.info(`📦 Extracting Vulkan Runtime (➔ vulkan-1.dll) ...`);
     const runtime_destination = path.normalize(`${destination}/runtime`);
-    const install_path = extract_archive(runtime_archive_filepath, runtime_destination);
+    const install_path = extract_archive(runtime_path, runtime_destination);
     return install_path;
 }
 exports.install_vulkan_runtime = install_vulkan_runtime;

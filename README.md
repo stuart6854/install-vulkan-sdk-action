@@ -8,12 +8,9 @@ A Github Action to install the Vulkan SDK and it's runtime.
 
 This action can be used to install the Vulkan SDK in your Github Action workflows.
 
-___
+---
 
 - [Github Action: Install Vulkan SDK](#github-action-install-vulkan-sdk)
-  - [Vulkan](#vulkan)
-    - [Websites](#websites)
-    - [What is Vulkan?](#what-is-vulkan)
   - [Usage](#usage)
     - [Quick start](#quick-start)
   - [Action Reference](#action-reference)
@@ -21,7 +18,82 @@ ___
     - [Outputs](#outputs)
     - [Environment Variables](#environment-variables)
   - [Keep up-to-date with GitHub Dependabot](#keep-up-to-date-with-github-dependabot)
+  - [Vulkan](#vulkan)
+    - [Websites](#websites)
+    - [What is Vulkan?](#what-is-vulkan)
   - [License](#license)
+
+## Usage
+
+### Quick start
+
+```yaml
+jobs:
+  build:
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - { name: "Windows", os: windows-latest }
+          - { name: "Ubuntu", os: ubuntu-latest }
+          - { name: "MacOS", os: macos-latest }
+
+    steps:
+      - name: Install Vulkan SDK
+        uses: jakoch/install-vulkan-sdk-action@main
+        with:
+          # You can set the Vulkan SDK version to download.
+          # Defaults to latest version, if version not set.
+          version: 1.3.216.0
+
+```
+
+## Action Reference
+
+You can find all Inputs and Outputs and their default settings in the [action.yml](https://github.com/jakoch/install-vulkan-sdk-action/blob/main/action.yml) file.
+
+### Inputs
+
+The following inputs can be used as `steps.with` keys:
+
+| Name               | Type    | Description                           | Default                 | Required |
+|--------------------|---------|---------------------------------------|-------------------------|----------|
+| `version`          | String  | A Vulkan SDK version (eg. `1.2.189.1`). | If `version` is not set, the latest version is used. | false |
+| `destination`      | String  | The Vulkan SDK installation folder.     | Windows: `C:\VulkanSDK`. Linux/MacOS: `%HOME` | false |
+| `install_runtime`  | bool    | Windows only. Installs the vulkan runtime ('vulkan-1.dll') into a `runtime` folder inside `destination`, if true. Windows: `C:\VulkanSDK\runtime`. | true | false |
+| `use_cache`        | bool    | Cache the Vulkan installation folder. | true | false |
+| `optional_components`| String | Comma-separated list of components to install. | Default: no optional components. | false |
+
+### Outputs
+
+The following output variables are available:
+
+| Name               | Type    | Description                           |
+|--------------------|---------|---------------------------------------|
+| `VULKAN_VERSION`   | String  | The installed Vulkan SDK version.     |
+| `VULKAN_SDK`       | String  | The location of your Vulkan SDK files |
+
+### Environment Variables
+
+The following environment variables are set:
+
+| Name             | Type    |  Description                                   |
+|------------------|---------|------------------------------------------------|
+| `VULKAN_VERSION` | String  | The installed Vulkan SDK version.              |
+| `VULKAN_SDK`     | String  | The location of your Vulkan SDK files          |
+
+## Keep up-to-date with GitHub Dependabot
+
+Dependabot has native GitHub Actions support.
+To enable it for your Github repo you just need to add a `.github/dependabot.yml` file:
+
+    version: 2
+    updates:
+      # Maintain dependencies for GitHub Actions
+      - package-ecosystem: "github-actions"
+        directory: "/"
+        schedule:
+          interval: "weekly"
 
 ## Vulkan
 
@@ -48,75 +120,6 @@ ___
 > - Third-party libraries such as [GLM](https://github.com/g-truc/glm) and [SDL](https://www.libsdl.org/).
 >
 > -- <cite>https://vulkan.lunarg.com/doc/sdk/latest/windows/getting_started.html</cite>
-
-## Usage
-
-### Quick start
-
-```yaml
-jobs:
-  build:
-    runs-on: ${{ matrix.config.os }}
-    strategy:
-      matrix:
-        config:
-          - { name: "Windows", os: windows-latest }
-          - { name: "Ubuntu", os: ubuntu-latest }
-          - { name: "MacOS", os: macos-latest }
-
-    steps:
-      - name: Install VULKAN SDK
-        uses: jakoch/install-vulkan-sdk-action@main
-        with:
-          # You can set the VULKAN SDK version to download.
-          # Defaults to latest version, if version not set.
-          version: 1.2.198.1
-
-```
-## Action Reference
-
-You can find all Inputs and Outputs and their default settings in the [action.yml](https://github.com/jakoch/install-vulkan-sdk-action/blob/main/action.yml) file.
-
-### Inputs
-
-The following inputs can be used as `steps.with` keys:
-
-| Name               | Type    | Description                           | Default                 | Required |
-|--------------------|---------|---------------------------------------|-------------------------|----------|
-| `version`          | String  | A Vulkan SDK version (eg. `1.2.189.1`). | If `version` is not set, the latest version is used. | false |
-| `destination`      | String  | The Vulkan SDK installation folder.     | Windows: `C:\VulkanSDK`. Linux/MacOS: `%HOME` | false |
-| `install_runtime`  | bool    | Windows only. Installs the vulkan runtime ('vulkan-1.dll') into a `runtime` folder inside `destination`, if true. Windows: `C:\VulkanSDK\runtime`. | true | false |
-| `use_cache`        | bool    | Cache the Vulkan installation folder. | true | false |
-
-### Outputs
-
-The following output variables are available:
-
-| Name               | Type    | Description                           |
-|--------------------|---------|---------------------------------------|
-| `VULKAN_VERSION`   | String  | The installed Vulkan SDK version.     |
-| `VULKAN_SDK`       | String  | The location of your Vulkan SDK files |
-
-### Environment Variables
-
-The following environment variables are set:
-
-| Name            | Type    | Default      | Description                                    |
-|-----------------|---------|--------------|------------------------------------------------|
-| `VULKAN_SDK`    | String  | `~/.default_value` | The location of your Vulkan SDK files  |
-
-## Keep up-to-date with GitHub Dependabot
-
-Dependabot has native GitHub Actions support.
-To enable it for your Github repo you just need to add a `.github/dependabot.yml` file:
-
-    version: 2
-    updates:
-      # Maintain dependencies for GitHub Actions
-      - package-ecosystem: "github-actions"
-        directory: "/"
-        schedule:
-          interval: "weekly"
 
 ## License
 
