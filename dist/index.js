@@ -322,7 +322,6 @@ async function install_vulkan_sdk(sdk_path, destination, version, optional_compo
     }
     if (platform.IS_LINUX) {
         install_path = await extract_archive(sdk_path, destination);
-        //const cachedPath = await tc.cacheDir(install_path, 'vulkan_sdk', version, platform.OS_ARCH)
     }
     if (platform.IS_WINDOWS) {
         // arguments for Vulkan-Installer.exe
@@ -358,6 +357,7 @@ async function install_vulkan_sdk(sdk_path, destination, version, optional_compo
             core.setFailed(`Installer failed: ${install_cmd}`);
         }
     }
+    core.info(`  Installation folder: ${install_path}`);
     core.addPath(install_path);
     return install_path;
 }

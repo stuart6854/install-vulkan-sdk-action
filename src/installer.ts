@@ -21,7 +21,6 @@ export async function install_vulkan_sdk(
 
   if (platform.IS_LINUX) {
     install_path = await extract_archive(sdk_path, destination)
-    //const cachedPath = await tc.cacheDir(install_path, 'vulkan_sdk', version, platform.OS_ARCH)
   }
 
   if (platform.IS_WINDOWS) {
@@ -60,6 +59,8 @@ export async function install_vulkan_sdk(
       core.setFailed(`Installer failed: ${install_cmd}`)
     }
   }
+
+  core.info(`  Installation folder: ${install_path}`)
 
   core.addPath(install_path)
 
