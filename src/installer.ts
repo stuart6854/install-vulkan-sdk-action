@@ -6,7 +6,12 @@ import * as path from 'path'
 //import { exec } from '@actions/exec'
 import {execFileSync, execSync} from 'child_process'
 
-export async function install_vulkan_sdk(sdk_path: string, destination: string, version: string): Promise<string> {
+export async function install_vulkan_sdk(
+  sdk_path: string,
+  destination: string,
+  version: string,
+  optional_components: string[]
+): Promise<string> {
   let install_path = ''
 
   core.info(`📦 Extracting Vulkan SDK...`)
@@ -22,32 +27,33 @@ export async function install_vulkan_sdk(sdk_path: string, destination: string, 
   }
 
   if (platform.IS_WINDOWS) {
-    // TODO allow installing optional components
-    // --confirm-command install com.lunarg.vulkan.32bit
-    //                           com.lunarg.vulkan.thirdparty
-    //                           com.lunarg.vulkan.debug
-    //                           com.lunarg.vulkan.debug32
-
+    // arguments for Vulkan-Installer.exe
     let cmd_args = [
-      //sdk_path,
       '--root',
       destination,
       '--accept-licenses',
       '--default-answer',
       '--confirm-command',
-      'install'
+      'install',
+      optional_components
     ]
     let install_cmd = cmd_args.join(' ')
 
+    // Installation of optional components:
+    //
+    // --confirm-command install com.lunarg.vulkan.32bit
+    //                           com.lunarg.vulkan.thirdparty
+    //                           com.lunarg.vulkan.debug
+    //                           com.lunarg.vulkan.debug32
+
+    // The installer must be run as administrator.
     // powershell.exe Start-Process
     //   -FilePath 'VulkanSDK-1.3.216.0-Installer.exe'
     //   -Args '--root C:\VulkanSDK --accept-licenses --default-answer --confirm-command install'
     //   -Verb runas
+    const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${install_cmd}' -Verb RunAs`
 
     try {
-      //const run_as_admin_cmd = `pwsh runas.exe /noprofile /user:Administrator "${install_cmd}"`
-      const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${install_cmd}' -Verb RunAs`
-      //core.info(`Install Command: ${run_as_admin_cmd}`)
       let stdout: string = execSync(run_as_admin_cmd).toString().trim()
       process.stdout.write(stdout)
       install_path = destination

@@ -247,20 +247,26 @@ async function getInputDestination(destination) {
     return destination;
 }
 // https://vulkan.lunarg.com/doc/view/latest/windows/getting_started.html#user-content-installing-optional-components
-async function getInputOptionalComponents(optional_components) {
+function getInputOptionalComponents(optional_components) {
+    if (!optional_components) {
+        return [];
+    }
     const optional_components_allowlist = [
         'com.lunarg.vulkan.32bit',
         'com.lunarg.vulkan.thirdparty',
         'com.lunarg.vulkan.debug',
         'com.lunarg.vulkan.debug32'
     ];
-    const input_components = optional_components.split(',').map((item) => item.trim());
-    const invalid_input_components = input_components.filter(item => optional_components_allowlist.includes(item) === false);
-    if (invalid_input_components.length != 0) {
+    const input_components = optional_components
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
+    let invalid_input_components = input_components.filter(item => optional_components_allowlist.includes(item) === false);
+    if (invalid_input_components.length) {
         core.info(`❌ Please remove the following invalid optional_components: ${invalid_input_components}`);
     }
-    const valid_input_components = input_components.filter(item => optional_components_allowlist.includes(item) === true);
-    if (valid_input_components.length != 0) {
+    let valid_input_components = input_components.filter(item => optional_components_allowlist.includes(item) === true);
+    if (valid_input_components.length) {
         core.info(`✔️ Installing Optional Components: ${valid_input_components}`);
     }
     return valid_input_components;
@@ -307,7 +313,7 @@ const tc = __importStar(__nccwpck_require__(784));
 const path = __importStar(__nccwpck_require__(17));
 //import { exec } from '@actions/exec'
 const child_process_1 = __nccwpck_require__(81);
-async function install_vulkan_sdk(sdk_path, destination, version) {
+async function install_vulkan_sdk(sdk_path, destination, version, optional_components) {
     let install_path = '';
     core.info(`📦 Extracting Vulkan SDK...`);
     if (platform.IS_MAC) {
@@ -319,29 +325,30 @@ async function install_vulkan_sdk(sdk_path, destination, version) {
         core.addPath(cachedPath);
     }
     if (platform.IS_WINDOWS) {
-        // TODO allow installing optional components
-        // --confirm-command install com.lunarg.vulkan.32bit
-        //                           com.lunarg.vulkan.thirdparty
-        //                           com.lunarg.vulkan.debug
-        //                           com.lunarg.vulkan.debug32
+        // arguments for Vulkan-Installer.exe
         let cmd_args = [
-            //sdk_path,
             '--root',
             destination,
             '--accept-licenses',
             '--default-answer',
             '--confirm-command',
-            'install'
+            'install',
+            optional_components
         ];
         let install_cmd = cmd_args.join(' ');
+        // Installation of optional components:
+        //
+        // --confirm-command install com.lunarg.vulkan.32bit
+        //                           com.lunarg.vulkan.thirdparty
+        //                           com.lunarg.vulkan.debug
+        //                           com.lunarg.vulkan.debug32
+        // The installer must be run as administrator.
         // powershell.exe Start-Process
         //   -FilePath 'VulkanSDK-1.3.216.0-Installer.exe'
         //   -Args '--root C:\VulkanSDK --accept-licenses --default-answer --confirm-command install'
         //   -Verb runas
+        const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${install_cmd}' -Verb RunAs`;
         try {
-            //const run_as_admin_cmd = `pwsh runas.exe /noprofile /user:Administrator "${install_cmd}"`
-            const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${install_cmd}' -Verb RunAs`;
-            //core.info(`Install Command: ${run_as_admin_cmd}`)
             let stdout = (0, child_process_1.execSync)(run_as_admin_cmd).toString().trim();
             process.stdout.write(stdout);
             install_path = destination;
@@ -454,7 +461,7 @@ function show_cache() {
         core.info(`🎯 Cached versions of Vulkan SDK available: ${cachedVersions}`);
     }
 }
-async function get_vulkan_sdk(version, destination, use_cache) {
+async function get_vulkan_sdk(version, destination, optional_components, use_cache) {
     let install_path;
     let ver = await version_getter.resolve_version(version);
     if (use_cache) {
@@ -467,7 +474,7 @@ async function get_vulkan_sdk(version, destination, use_cache) {
         }
     }
     const vulkan_sdk_path = await downloader.download_vulkan_sdk(ver);
-    install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, ver);
+    install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, ver, optional_components);
     return install_path;
 }
 async function get_vulkan_runtime(version, destination, use_cache) {
@@ -490,7 +497,7 @@ async function run() {
     try {
         const inputs = await input.getInputs();
         const version = await version_getter.resolve_version(inputs.version);
-        const sdk_path = await get_vulkan_sdk(version, inputs.destination, inputs.use_cache);
+        const sdk_path = await get_vulkan_sdk(version, inputs.destination, inputs.optional_components, inputs.use_cache);
         const sdk_versionized_path = path.normalize(`${sdk_path}/${version}`);
         core.addPath(`${sdk_versionized_path}`);
         core.info(`✔️ [PATH] Added path to Vulkan SDK to environment variable PATH.`);

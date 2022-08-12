@@ -70,7 +70,11 @@ async function getInputDestination(destination: string): Promise<string> {
 }
 
 // https://vulkan.lunarg.com/doc/view/latest/windows/getting_started.html#user-content-installing-optional-components
-export async function getInputOptionalComponents(optional_components: string): Promise<string[]> {
+export function getInputOptionalComponents(optional_components: string): string[] {
+  if (!optional_components) {
+    return []
+  }
+
   const optional_components_allowlist: string[] = [
     'com.lunarg.vulkan.32bit',
     'com.lunarg.vulkan.thirdparty',
@@ -78,17 +82,22 @@ export async function getInputOptionalComponents(optional_components: string): P
     'com.lunarg.vulkan.debug32'
   ]
 
-  const input_components: string[] = optional_components.split(',').map((item: string) => item.trim())
+  const input_components: string[] = optional_components
+    .split(',')
+    .map((item: string) => item.trim())
+    .filter(Boolean)
 
-  const invalid_input_components = input_components.filter(
+  let invalid_input_components: string[] = input_components.filter(
     item => optional_components_allowlist.includes(item) === false
   )
-  if (invalid_input_components.length != 0) {
+  if (invalid_input_components.length) {
     core.info(`❌ Please remove the following invalid optional_components: ${invalid_input_components}`)
   }
 
-  const valid_input_components = input_components.filter(item => optional_components_allowlist.includes(item) === true)
-  if (valid_input_components.length != 0) {
+  let valid_input_components: string[] = input_components.filter(
+    item => optional_components_allowlist.includes(item) === true
+  )
+  if (valid_input_components.length) {
     core.info(`✔️ Installing Optional Components: ${valid_input_components}`)
   }
 

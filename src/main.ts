@@ -20,7 +20,12 @@ function show_cache(): void {
   }
 }
 
-async function get_vulkan_sdk(version: string, destination: string, use_cache: boolean): Promise<string> {
+async function get_vulkan_sdk(
+  version: string,
+  destination: string,
+  optional_components: string[],
+  use_cache: boolean
+): Promise<string> {
   let install_path: string
   let ver = await version_getter.resolve_version(version)
   if (use_cache) {
@@ -33,7 +38,7 @@ async function get_vulkan_sdk(version: string, destination: string, use_cache: b
     }
   }
   const vulkan_sdk_path = await downloader.download_vulkan_sdk(ver)
-  install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, ver)
+  install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, ver, optional_components)
   return install_path
 }
 
@@ -60,7 +65,7 @@ async function run(): Promise<void> {
 
     const version = await version_getter.resolve_version(inputs.version)
 
-    const sdk_path = await get_vulkan_sdk(version, inputs.destination, inputs.use_cache)
+    const sdk_path = await get_vulkan_sdk(version, inputs.destination, inputs.optional_components, inputs.use_cache)
 
     const sdk_versionized_path = path.normalize(`${sdk_path}/${version}`)
 
