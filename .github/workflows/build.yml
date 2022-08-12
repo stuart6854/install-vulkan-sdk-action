@@ -57,6 +57,7 @@ jobs:
           # should say version not available
           # should print list of valid versions
           #version: 1.2.189.1
+          cache: true
 
       - name: Show Env Vars and SDK folder
         if: contains(matrix.config.OS, 'ubuntu')
