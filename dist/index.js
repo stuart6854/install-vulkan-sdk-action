@@ -313,7 +313,6 @@ const fs = __importStar(__nccwpck_require__(7147));
 const platform = __importStar(__nccwpck_require__(9238));
 const tc = __importStar(__nccwpck_require__(7784));
 const path = __importStar(__nccwpck_require__(1017));
-//import { exec } from '@actions/exec'
 const child_process_1 = __nccwpck_require__(2081);
 async function install_vulkan_sdk(sdk_path, destination, version, optional_components) {
     let install_path = '';
@@ -364,7 +363,7 @@ async function install_vulkan_sdk(sdk_path, destination, version, optional_compo
 }
 exports.install_vulkan_sdk = install_vulkan_sdk;
 async function install_vulkan_runtime(runtime_archive_filepath, destination) {
-    core.info(`📦 Extracting Vulkan Runtime...`);
+    core.info(`📦 Extracting Vulkan Runtime (➔ vulkan-1.dll) ...`);
     const runtime_destination = path.normalize(`${destination}/runtime`);
     const install_path = extract_archive(runtime_archive_filepath, runtime_destination);
     return install_path;

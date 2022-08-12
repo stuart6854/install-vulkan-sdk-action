@@ -5,9 +5,7 @@ import * as input from './inputs'
 import * as installer from './installer'
 import * as path from 'path'
 import * as platform from './platform'
-import * as tc from '@actions/tool-cache'
 import * as version_getter from './versiongetter'
-import * as fs from 'fs'
 
 async function get_vulkan_sdk(
   version: string,

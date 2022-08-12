@@ -3,16 +3,15 @@
 #
 # Copyright 2021 Jens A. Koch.
 # SPDX-License-Identifier: BSL-1.0
-# This file is part of ttauri-project.
 #
 
 name: "Install Vulkan SDK"
 description: "Installs the current Vulkan SDK"
 author: 'jakoch'
-branding: 
+branding:
   color: 'blue'
   icon: 'download'
-  
+
 inputs:
   install:
     description: "Install the SDK on true, or only set VULKAN_VERSION output variable on false."
@@ -20,62 +19,27 @@ inputs:
   version:
     description: "The Vulkan SDK version to download. Default: latest version."
     required: false
+  cache:
+    description: "Enables caching on true. Default: false."
+    required: false
+  destination:
+    description: "The installation folder. Default: see ReadMe."
+    required: false
+  optional_components:
+    description: "Comma-separated list of components to install. See Readme. Default: Only SDK, no optional components."
+    required: false
 
 outputs:
   VULKAN_VERSION:
     description: "Version number of the Vulkan SDK"
-    value: ${{ steps.vulkan-environment.outputs.VULKAN_VERSION }}
-
   VULKAN_SDK:
     description: "Location of the Vulkan SDK"
-    value: ${{ steps.vulkan-environment.outputs.VULKAN_SDK }}
 
 runs:
   using: 'node12'
   main: 'dist/index.js'
 
-# runs:
-#   using: "composite"
-#   steps:
-#     - name: 📥 Set latest VULKAN_VERSION as environment variable
-#       shell: pwsh
-#       run: |
-#       if ( "${env:INPUT_VERSION}" -eq "true")
-#       {
-#           echo 'VULKAN_VERSION<<EOF' >> $env:GITHUB_ENV
-#           curl --silent https://vulkan.lunarg.com/sdk/latest/windows.txt >> $env:GITHUB_ENV
-#           echo 'EOF' >> $env:GITHUB_ENV
-#       }
-
-#     - name: 📥 Setup download URLs ➔ VULKAN_SDK_URL & VULKAN_RUN_URL
-#       id: vulkan-environment
-#       shell: pwsh
-#       run: |
-#         $env:BASE_URL="https://sdk.lunarg.com/sdk/download/${env:VULKAN_VERSION}/windows"
-#         $env:VULKAN_SDK_URL="${env:BASE_URL}/VulkanSDK-${env:VULKAN_VERSION}-Installer.exe?Human=true"
-#         $env:VULKAN_RUN_URL="${env:BASE_URL}/vulkan-runtime-components.zip?Human=true"
-#         $env:VULKAN_SDK="C:\VulkanSDK\${env:VULKAN_VERSION}"
-#         echo "VULKAN_SDK=${env:VULKAN_SDK}" >> $env:GITHUB_ENV
-#         echo "VULKAN_SDK_URL=${env:VULKAN_SDK_URL}" >> $env:GITHUB_ENV
-#         echo "VULKAN_RUN_URL=${env:VULKAN_RUN_URL}" >> $env:GITHUB_ENV
-#         echo "::set-output name=VULKAN_VERSION::${env:VULKAN_VERSION}"
-#         echo "::set-output name=VULKAN_SDK::${env:VULKAN_SDK}"
-
-#     - name: 🔽 Install VULKAN_SDK
-#       shell: pwsh
-#       if: ${{ env:INPUT_INSTALL == true }}
-#       run: |
-#         curl -L --silent --show-error --output VulkanSDK.exe "${env:VULKAN_SDK_URL}"
-#         VulkanSDK.exe /S
-
-#     - name: 🔽 Install VULKAN Runtime (➔ vulkan-1.dll)
-#       shell: pwsh
-#       if: ${{ env:INPUT_INSTALL == true }}
-#       run: |
-#         curl -L --silent --show-error --output vulkan-runtime.zip "${env:VULKAN_RUN_URL}"
-#         7z e vulkan-runtime.zip -o${env:VULKAN_SDK}\runtime\x64 */x64
-
-#     - name: ✂ Reduce VULKAN_SDK size before caching
+# TODO     - name: ✂ Reduce VULKAN_SDK size before caching
 #       shell: pwsh
 #       if: ${{ env:INPUT_INSTALL == true }}
 #       run: |

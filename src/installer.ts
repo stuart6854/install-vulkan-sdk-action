@@ -1,11 +1,9 @@
-import * as cache from '@actions/cache'
 import * as core from '@actions/core'
 import * as fs from 'fs'
 import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
 import * as path from 'path'
-//import { exec } from '@actions/exec'
-import {execFileSync, execSync} from 'child_process'
+import {execSync} from 'child_process'
 
 export async function install_vulkan_sdk(
   sdk_path: string,
@@ -69,7 +67,7 @@ export async function install_vulkan_sdk(
 }
 
 export async function install_vulkan_runtime(runtime_archive_filepath: string, destination: string): Promise<string> {
-  core.info(`📦 Extracting Vulkan Runtime...`)
+  core.info(`📦 Extracting Vulkan Runtime (➔ vulkan-1.dll) ...`)
   const runtime_destination = path.normalize(`${destination}/runtime`)
   const install_path = extract_archive(runtime_archive_filepath, runtime_destination)
   return install_path
