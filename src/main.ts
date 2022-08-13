@@ -33,13 +33,11 @@ async function get_vulkan_sdk(
   const vulkan_sdk_path = await downloader.download_vulkan_sdk(ver)
   install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, ver, optional_components)
 
-  let no_quotes_install_path = install_path.split('"').join('')
-
   // cache install folder
   if (use_cache) {
     try {
-      await cache.saveCache([no_quotes_install_path], cacheKey)
-      core.info(`🎯 [Cache] Saved Vulkan SDK '${ver}' in path: ${no_quotes_install_path}`)
+      await cache.saveCache([install_path], cacheKey)
+      core.info(`🎯 [Cache] Saved Vulkan SDK '${ver}' in path: ${install_path}`)
     } catch (error: any) {
       core.warning(error)
     }
