@@ -6,10 +6,10 @@
 
 A Github Action to install the Vulkan SDK and it's runtime.
 
-This action can be used to install the Vulkan SDK in your Github Action workflows.
-The SDK version number is automatically fetched via the Web API, if not set to a fixed version number manually.
-The installation of optional SDK components is supported. 
-Reducing the size for the installed SDK for caching a smaller package on CI is on our [todo list](https://github.com/jakoch/install-vulkan-sdk-action/issues/247).
+- This action can be used to install the Vulkan SDK in your Github Action workflows.
+- The SDK version number is automatically fetched via the Web API, if not set to a fixed version number manually.
+- The installation of optional SDK components is supported. 
+- Reducing the size for the installed SDK for caching a smaller package on CI is on our [todo list](https://github.com/jakoch/install-vulkan-sdk-action/issues/247).
 
 ---
 
