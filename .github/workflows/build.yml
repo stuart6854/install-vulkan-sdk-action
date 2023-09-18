@@ -74,7 +74,4 @@ jobs:
           echo $env:PATH
           echo $env:VULKAN_VERSION
           echo $env:VULKAN_SDK
-
-      - name: ❔ CHECK important folders, to see if everything is present (after building)
-        run: |
           dir /S /B C:\VulkanSDK
