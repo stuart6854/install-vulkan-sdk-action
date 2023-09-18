@@ -74,4 +74,9 @@ jobs:
           echo $env:PATH
           echo $env:VULKAN_VERSION
           echo $env:VULKAN_SDK
+
+      - name: Show VulkanSDK folder (Windows)
+        if: contains(matrix.config.OS, 'windows')
+        shell: cmd
+        run: |
           dir /S /B C:\VulkanSDK
