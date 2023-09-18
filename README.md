@@ -47,7 +47,7 @@ jobs:
         with:
           # You can set the Vulkan SDK version to download.
           # Defaults to latest version, if version not set.
-          vulkan-version: 1.3.231.1
+          vulkan_version: 1.3.231.1
 
 ```
 
