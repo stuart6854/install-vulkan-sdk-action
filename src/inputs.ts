@@ -13,9 +13,9 @@ export interface Inputs {
 
 export async function getInputs(): Promise<Inputs> {
   return {
-    // Warning: This is intentionally "vulkan_version".
-    // Do not simply use "version", because if "with: version:" is not set,
-    // but an environment variable is defined, it be used (version = env.VERSION)
+    // Warning: This is intentionally "vulkan_version" to avoid unexpected behavior due to naming conflicts.
+    // Do not simply use "version", because if "with: version:" is not set (default to latest is wanted),
+    // but an environment variable is defined, that will be used (version = env.VERSION)
     // VERSION is often set to env for artifact names.
     version: await getInputVersion(core.getInput('vulkan_version', {required: false})),
     destination: await getInputDestination(core.getInput('destination', {required: false})),
@@ -34,7 +34,8 @@ export async function getInputVersion(version: string): Promise<string> {
     const versions = JSON.stringify(availableVersions, null, 2)
 
     throw new Error(
-      `Invalid format of version. Please specify a version using the format 'major.minor.build.rev'.
+      `Invalid format of vulkan-version (${requestedVersion}).
+       Please specify a version using the format 'major.minor.build.rev'.
        The following versions are available: ${versions}.`
     )
   }

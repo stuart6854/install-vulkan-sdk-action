@@ -112,7 +112,7 @@ async function run(): Promise<void> {
       errorMessage = error.message
     }
     //core.error(errorMessage);
-    core.setFailed(errorMessage);
+    core.setFailed(errorMessage)
   }
 }
 
