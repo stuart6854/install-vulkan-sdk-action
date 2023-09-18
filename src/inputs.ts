@@ -13,7 +13,11 @@ export interface Inputs {
 
 export async function getInputs(): Promise<Inputs> {
   return {
-    version: await getInputVersion(core.getInput('version', {required: false})),
+    // Warning: This is intentionally "vulkan_version".
+    // Do not simply use "version", because if "with: version:" is not set,
+    // but an environment variable is defined, it be used (version = env.VERSION)
+    // VERSION is often set to env for artifact names.
+    version: await getInputVersion(core.getInput('vulkan_version', {required: false})),
     destination: await getInputDestination(core.getInput('destination', {required: false})),
     install_runtime: /true/i.test(core.getInput('install_runtime', {required: false})),
     use_cache: /true/i.test(core.getInput('cache', {required: false})),

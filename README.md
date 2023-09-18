@@ -8,7 +8,7 @@ A Github Action to install the Vulkan SDK and it's runtime.
 
 - This action can be used to install the Vulkan SDK in your Github Action workflows.
 - The SDK version number is automatically fetched via the Web API, if not set to a fixed version number manually.
-- The installation of optional SDK components is supported. 
+- The installation of optional SDK components is supported.
 - Reducing the size of the installed SDK to have a smaller cache package size on CI is on our [todo list](https://github.com/jakoch/install-vulkan-sdk-action/issues/247).
 
 ---
@@ -47,7 +47,7 @@ jobs:
         with:
           # You can set the Vulkan SDK version to download.
           # Defaults to latest version, if version not set.
-          version: 1.3.231.1
+          vulkan-version: 1.3.231.1
 
 ```
 
@@ -61,7 +61,7 @@ The following inputs can be used as `steps.with` keys:
 
 | Name               | Type    | Description                           | Default                 | Required |
 |--------------------|---------|---------------------------------------|-------------------------|----------|
-| `version`          | String  | A Vulkan SDK version (eg. `1.3.231.1`). | If `version` is not set, the latest version is used. | false |
+| `vulkan-version`   | String  | A Vulkan SDK version (eg. `1.3.231.1`). | If `vulkan_version` is not set, the latest version is used. | false |
 | `destination`      | String  | The Vulkan SDK installation folder.     | Windows: `C:\VulkanSDK`. Linux/MacOS: `%HOME` | false |
 | `install_runtime`  | bool    | Windows only. Installs the vulkan runtime ('vulkan-1.dll') into a `runtime` folder inside `destination`, if true. Windows: `C:\VulkanSDK\runtime`. | true | false |
 | `use_cache`        | bool    | Cache the Vulkan installation folder. | true | false |
