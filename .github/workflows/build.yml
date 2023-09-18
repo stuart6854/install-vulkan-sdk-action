@@ -60,7 +60,7 @@ jobs:
           #vulkan_version: 1.2.3.4
           cache: true
 
-      - name: Show Env Vars and SDK folder
+      - name: Show Env Vars and SDK folder (Linux)
         if: contains(matrix.config.OS, 'ubuntu')
         run: |
           echo PATH = $PATH
@@ -68,7 +68,7 @@ jobs:
           echo VULKAN_SDK = $VULKAN_SDK
           echo Directory Size = `du -hs $VULKAN_SDK`
 
-      - name: Show Env Vars and SDK folder
+      - name: Show Env Vars and SDK folder (Windows)
         if: contains(matrix.config.OS, 'windows')
         run: |
           echo $env:PATH
