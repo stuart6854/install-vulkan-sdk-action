@@ -80,6 +80,16 @@ async function get_vulkan_runtime(version: string, destination: string, use_cach
   return install_path
 }
 
+/**
+ * Prints errors to the GitHub Actions console.
+ * Lets action exit with exit code 1.
+ */
+function errorHandler(error: Error): void {
+  let message = error.stack || error.message || String(error)
+  core.setFailed(message)
+  //process.exit()
+}
+
 async function run(): Promise<void> {
   try {
     const inputs: input.Inputs = await input.getInputs()
@@ -107,12 +117,7 @@ async function run(): Promise<void> {
       core.info(`✔️ [INFO] Path to Vulkan Runtime: ${install_path}`)
     }
   } catch (error: any) {
-    let errorMessage = 'ErrorMessage'
-    if (error instanceof Error) {
-      errorMessage = error.message
-    }
-    //core.error(errorMessage);
-    core.setFailed(errorMessage)
+    errorHandler(error as Error)
   }
 }
 

@@ -74,9 +74,9 @@ async function is_downloadable(name, version, url) {
         const HttpClientResponse = await http.client.head(url);
         const statusCode = HttpClientResponse.message.statusCode;
         if (statusCode !== undefined && statusCode >= 400) {
-            core.setFailed(`❌ ${name} version not found: ${version} using URL: ${url}`);
+            core.setFailed(`❌ Http(Error): The requested ${name} ${version} is not downloadable using URL: ${url}.`);
         }
-        core.info(`✔️ The requested ${name} version was found: ${version}`);
+        core.info(`✔️ Http(200): The requested ${name} ${version} is downloadable.`);
     }
     catch (error) {
         if (error instanceof Error) {
@@ -198,7 +198,11 @@ const platform = __importStar(__nccwpck_require__(9238));
 const version_getter = __importStar(__nccwpck_require__(2853));
 async function getInputs() {
     return {
-        version: await getInputVersion(core.getInput('version', { required: false })),
+        // Warning: This is intentionally "vulkan_version" to avoid unexpected behavior due to naming conflicts.
+        // Do not simply use "version", because if "with: version:" is not set (default to latest is wanted),
+        // but an environment variable is defined, that will be used (version = env.VERSION)
+        // VERSION is often set to env for artifact names.
+        version: await getInputVersion(core.getInput('vulkan_version', { required: false })),
         destination: await getInputDestination(core.getInput('destination', { required: false })),
         install_runtime: /true/i.test(core.getInput('install_runtime', { required: false })),
         use_cache: /true/i.test(core.getInput('cache', { required: false })),
@@ -212,7 +216,8 @@ async function getInputVersion(version) {
     if (!requestedVersion && !validateVersion(requestedVersion)) {
         const availableVersions = await version_getter.getAvailableVersions();
         const versions = JSON.stringify(availableVersions, null, 2);
-        throw new Error(`Invalid format of version. Please specify a version using the format 'major.minor.build.rev'.
+        throw new Error(`Invalid format of "vulkan_version: (${requestedVersion}").
+       Please specify a version using the format 'major.minor.build.rev'.
        The following versions are available: ${versions}.`);
     }
     if (requestedVersion === '') {
@@ -508,6 +513,15 @@ async function get_vulkan_runtime(version, destination, use_cache) {
     }
     return install_path;
 }
+/**
+ * Prints errors to the GitHub Actions console.
+ * Lets action exit with exit code 1.
+ */
+function errorHandler(error) {
+    let message = error.stack || error.message || String(error);
+    core.setFailed(message);
+    //process.exit()
+}
 async function run() {
     try {
         const inputs = await input.getInputs();
@@ -527,11 +541,7 @@ async function run() {
         }
     }
     catch (error) {
-        let errorMessage = 'ErrorMessage';
-        if (error instanceof Error) {
-            errorMessage = error.message;
-        }
-        core.error(errorMessage);
+        errorHandler(error);
     }
 }
 run();
