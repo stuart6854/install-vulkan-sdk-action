@@ -534,7 +534,6 @@ async function run() {
         core.info(`✔️ [ENV] Set env variable VULKAN_SDK -> "${sdk_versionized_path}".`);
         core.exportVariable('VULKAN_VERSION', `${version}`);
         core.info(`✔️ [ENV] Set env variable VULKAN_VERSION -> "${version}".`);
-        core.setOutput('VULKAN_VERSION', version);
         if (inputs.install_runtime /*&& platform.IS_WINDOWS*/) {
             const install_path = await get_vulkan_runtime(version, inputs.destination, inputs.use_cache);
             core.info(`✔️ [INFO] Path to Vulkan Runtime: ${install_path}`);

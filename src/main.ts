@@ -109,8 +109,6 @@ async function run(): Promise<void> {
     core.exportVariable('VULKAN_VERSION', `${version}`)
     core.info(`✔️ [ENV] Set env variable VULKAN_VERSION -> "${version}".`)
 
-    core.setOutput('VULKAN_VERSION', version)
-
     if (inputs.install_runtime /*&& platform.IS_WINDOWS*/) {
       const install_path = await get_vulkan_runtime(version, inputs.destination, inputs.use_cache)
 
