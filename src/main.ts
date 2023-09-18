@@ -16,14 +16,27 @@ async function get_vulkan_sdk(
   let install_path: string
   let ver = await version_getter.resolve_version(version)
 
-  const cacheKey = `vulkan-sdk-${version}-${platform.OS_PLATFORM}-${platform.OS_ARCH}`
+  const cachePrimaryKey = `vulkan-sdk-${version}-${platform.OS_PLATFORM}-${platform.OS_ARCH}`
+  const cacheRestoreKeys = ['vulkan-sdk-', 'vulkan-']
 
   // restore from cache
   if (use_cache) {
-    let restoredFromCache = undefined
-    restoredFromCache = await cache.restoreCache([destination], cacheKey)
-    if (restoredFromCache !== undefined) {
-      core.info(`🎯 [Cache] Restored Vulkan SDK '${ver}' in path: ${destination}`)
+    let cacheKey = undefined
+    try {
+      // .slice() to workaround https://github.com/actions/toolkit/issues/1377
+      cacheKey = await cache.restoreCache([destination].slice(), cachePrimaryKey, cacheRestoreKeys)
+    } catch (error) {
+      const errorAsError = error as Error
+      if (errorAsError.name === cache.ValidationError.name) {
+        throw error
+      } else {
+        core.info(`[warning] There was an error restoring the cache ${errorAsError.message}`)
+      }
+    }
+
+    if (cacheKey) {
+      console.log(`Found cache for key: ${cacheKey}`)
+      core.info(`🎯 [Cache] Restored Vulkan SDK '${ver}' in path: ${destination}. Cache restore ID '${cacheKey}'.`)
       core.addPath(destination)
       return destination
     }
@@ -36,8 +49,8 @@ async function get_vulkan_sdk(
   // cache install folder
   if (use_cache) {
     try {
-      await cache.saveCache([install_path], cacheKey)
-      core.info(`🎯 [Cache] Saved Vulkan SDK '${ver}' in path: ${install_path}`)
+      const cacheId = await cache.saveCache([install_path], cachePrimaryKey)
+      core.info(`🎯 [Cache] Saved Vulkan SDK '${ver}' in path: ${install_path}. Cache saved with ID '${cacheId}'.`)
     } catch (error: any) {
       core.warning(error)
     }
