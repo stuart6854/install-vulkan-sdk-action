@@ -34,7 +34,7 @@ export async function getInputVersion(version: string): Promise<string> {
     const versions = JSON.stringify(availableVersions, null, 2)
 
     throw new Error(
-      `Invalid format of vulkan-version (${requestedVersion}).
+      `Invalid format of "vulkan_version: (${requestedVersion}").
        Please specify a version using the format 'major.minor.build.rev'.
        The following versions are available: ${versions}.`
     )
