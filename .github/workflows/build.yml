@@ -40,9 +40,9 @@ jobs:
       matrix:
         config:
           # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
-          - { os: windows-2022 }
-          - { os: ubuntu-22.04 }
-          - { os: macos-12     }
+          - { OS: windows-2022 }
+          - { OS: ubuntu-22.04 }
+          - { OS: macos-12     }
 
     steps:
 
@@ -61,7 +61,7 @@ jobs:
           cache: true
 
       - name: Show Env Vars and SDK folder
-        if: contains(matrix.config.os, 'ubuntu')
+        if: contains(matrix.config.OS, 'ubuntu')
         run: |
           echo PATH = $PATH
           echo VULKAN_VERSION = $VULKAN_VERSION
@@ -69,7 +69,7 @@ jobs:
           echo Directory Size = `du -hs $VULKAN_SDK`
 
       - name: Show Env Vars and SDK folder
-        if: contains(matrix.config.os, 'windows')
+        if: contains(matrix.config.OS, 'windows')
         run: |
           echo $env:PATH
           echo $env:VULKAN_VERSION
