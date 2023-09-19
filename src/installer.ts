@@ -102,10 +102,12 @@ export async function install_vulkan_sdk_windows(
 ): Promise<string> {
   let install_path = ''
 
+  const versionized_destination_path = path.normalize(`${destination}/${version}`)
+
   // arguments for Vulkan-Installer.exe
   let cmd_args = [
     '--root',
-    destination,
+    versionized_destination_path,
     '--accept-licenses',
     '--default-answer',
     '--confirm-command',

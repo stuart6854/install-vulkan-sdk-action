@@ -53,9 +53,6 @@ async function get_vulkan_sdk(
     }
   }
 
-  // TODO source the setup-env.sh file in the vulkan sdk installation folder
-  // await exec('bash', ['./setup-env.sh'], {cwd: install_path})
-
   return install_path
 }
 
