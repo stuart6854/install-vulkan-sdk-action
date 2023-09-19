@@ -16,6 +16,7 @@ async function get_vulkan_sdk(
   let install_path: string
   let ver = await version_getter.resolve_version(version)
 
+  // "cache-vulkan-sdk-1.3.250.1-linux-x64"
   const cachePrimaryKey = `cache-vulkan-sdk-${version}-${platform.OS_PLATFORM}-${platform.OS_ARCH}`
 
   // restore from cache
@@ -117,16 +118,36 @@ async function run(): Promise<void> {
 
     const sdk_versionized_path = path.normalize(`${sdk_path}/${version}`)
 
+    // Setup Paths to the Vulkan SDK
+    //
+    // https://vulkan.lunarg.com/doc/sdk/1.3.261.1/linux/getting_started.html#set-up-the-runtime-environment
+    //
+    // According to the docs one would "source ~/vulkan/1.x.yy.z/setup-env.sh".
+    // But here we setup our paths by setting these environment variables ourself.
+    // We set PATH, VULKAN_SDK, VK_LAYER_PATH, LD_LIBRARY_PATH and additionally VULKAN_VERSION.
+
+    // export PATH=$VULKAN_SDK/bin:$PATH
     core.addPath(`${sdk_versionized_path}`)
     core.info(`✔️ [PATH] Added path to Vulkan SDK to environment variable PATH.`)
 
+    // export VULKAN_SDK=~/vulkan/1.x.yy.z/x86_64
     core.exportVariable('VULKAN_SDK', `${sdk_versionized_path}`)
     core.info(`✔️ [ENV] Set env variable VULKAN_SDK -> "${sdk_versionized_path}".`)
 
     core.exportVariable('VULKAN_VERSION', `${version}`)
     core.info(`✔️ [ENV] Set env variable VULKAN_VERSION -> "${version}".`)
 
-    if (inputs.install_runtime /*&& platform.IS_WINDOWS*/) {
+    if (platform.IS_LINUX) {
+      // export VK_LAYER_PATH=$VULKAN_SDK/etc/vulkan/explicit_layer.d
+      core.exportVariable('VK_LAYER_PATH', `${sdk_versionized_path}/etc/vulkan/explicit_layer.d`)
+
+      // export LD_LIBRARY_PATH=$VULKAN_SDK/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+      const ld_library_path = process.env.LD_LIBRARY_PATH || ''
+      const new_ld_library_path = `${sdk_versionized_path}/lib:${ld_library_path}`
+      core.exportVariable('LD_LIBRARY_PATH', new_ld_library_path)
+    }
+
+    if (inputs.install_runtime && platform.IS_WINDOWS) {
       const install_path = await get_vulkan_runtime(version, inputs.destination, inputs.use_cache)
 
       core.info(`✔️ [INFO] Path to Vulkan Runtime: ${install_path}`)

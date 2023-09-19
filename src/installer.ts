@@ -5,6 +5,15 @@ import * as tc from '@actions/tool-cache'
 import * as path from 'path'
 import {execSync} from 'child_process'
 
+/**
+ * Install the Vulkan SDK.
+ *
+ * @param sdk_path - Path to the Vulkan SDK installer executable.
+ * @param destination - Installation destination path.
+ * @param version - Vulkan SDK version.
+ * @param optional_components - Array of optional components to install.
+ * @returns Promise<string> - Installation path.
+ */
 export async function install_vulkan_sdk(
   sdk_path: string,
   destination: string,
@@ -29,6 +38,15 @@ export async function install_vulkan_sdk(
   return install_path
 }
 
+/**
+ * Install the Vulkan SDK on a Linux system.
+ *
+ * @param sdk_path - Path to the Vulkan SDK installer executable.
+ * @param destination - Installation destination path.
+ * @param version - Vulkan SDK version.
+ * @param optional_components - Array of optional components to install.
+ * @returns Promise<string> - Installation path.
+ */
 export async function install_vulkan_sdk_linux(
   sdk_path: string,
   destination: string,
@@ -40,6 +58,15 @@ export async function install_vulkan_sdk_linux(
   return install_path
 }
 
+/**
+ * Install the Vulkan SDK on a MAC system.
+ *
+ * @param sdk_path - Path to the Vulkan SDK installer executable.
+ * @param destination - Installation destination path.
+ * @param version - Vulkan SDK version.
+ * @param optional_components - Array of optional components to install.
+ * @returns Promise<string> - Installation path.
+ */
 export async function install_vulkan_sdk_mac(
   sdk_path: string,
   destination: string,
@@ -51,6 +78,7 @@ export async function install_vulkan_sdk_mac(
   // https://vulkan.lunarg.com/doc/view/1.2.189.0/mac/getting_started.html
   // TODO
   // 1. mount dmg
+  //    local mountpoint=$(hdiutil attach vulkan_sdk.dmg | grep -i vulkansdk | awk 'END {print $NF}')
   // 2. build installer cmd
   //    sudo ./InstallVulkan.app/Contents/MacOS/InstallVulkan --root "installation path" --accept-licenses --default-answer --confirm-command install
 
@@ -123,21 +151,29 @@ export async function install_vulkan_runtime(runtime_path: string, destination: 
   return install_path
 }
 
+/**
+ * Extracts an archive file to a specified destination based on the platform and file type.
+ *
+ * @param {string} file - The path to the archive file to be extracted.
+ * @param {string} destination - The destination directory where the archive contents will be extracted.
+ * @returns {Promise<string>} A Promise that resolves to the destination directory path after extraction.
+ */
 async function extract_archive(file: string, destination: string): Promise<string> {
-  const extract = tc.extractTar
+  let extract = tc.extractTar // default extract method on linux: tar
+
   if (platform.IS_WINDOWS) {
     if (file.endsWith('.exe')) {
+      // No extraction needed for .exe files
       return destination
     } else if (file.endsWith('.zip')) {
-      const extract = tc.extractZip
+      extract = (file, destination) => tc.extractZip(file, destination)
     } else if (file.endsWith('.7z')) {
-      const extract = tc.extract7z
+      extract = (file, destination) => tc.extract7z(file, destination)
     }
   } else if (platform.IS_MAC) {
-    const extract = tc.extractXar
-  } else {
-    const extract = tc.extractTar
+    extract = (file, destination) => tc.extractXar(file, destination)
   }
+
   return await extract(file, destination)
 }
 
@@ -157,18 +193,6 @@ function verify_installation_of_runtime(sdk_path?: string): boolean {
   let r = false
   if (platform.IS_WINDOWS) {
     const file = `${sdk_path}/runtime/vulkan-1.dll`
-    r = fs.existsSync(file)
-  }
-  return r
-}
-
-function setup_vulkan(sdk_path?: string): boolean {
-  let r = false
-  if (platform.IS_LINUX || platform.IS_MAC) {
-    r = fs.existsSync(`${sdk_path}/bin/vulkaninfo`)
-  }
-  if (platform.IS_WINDOWS) {
-    const file = path.normalize(`${sdk_path}/bin/vulkaninfoSDK.exe`)
     r = fs.existsSync(file)
   }
   return r
