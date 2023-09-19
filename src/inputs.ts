@@ -83,11 +83,17 @@ export function getInputOptionalComponents(optional_components: string): string[
     return []
   }
 
+  // list components on windows: "maintenancetool.exe list" or "installer.exe search"
   const optional_components_allowlist: string[] = [
     'com.lunarg.vulkan.32bit',
+    'com.lunarg.vulkan.sdl2',
+    'com.lunarg.vulkan.glm',
+    'com.lunarg.vulkan.volk',
+    'com.lunarg.vulkan.vma',
+    'com.lunarg.vulkan.debug32',
+    // components of old installers
     'com.lunarg.vulkan.thirdparty',
-    'com.lunarg.vulkan.debug',
-    'com.lunarg.vulkan.debug32'
+    'com.lunarg.vulkan.debug'
   ]
 
   const input_components: string[] = optional_components
