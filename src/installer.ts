@@ -16,53 +16,102 @@ export async function install_vulkan_sdk(
   core.info(`📦 Extracting Vulkan SDK...`)
 
   if (platform.IS_MAC) {
-    // TODO
-  }
-
-  if (platform.IS_LINUX) {
-    install_path = await extract_archive(sdk_path, destination)
-  }
-
-  if (platform.IS_WINDOWS) {
-    // arguments for Vulkan-Installer.exe
-    let cmd_args = [
-      '--root',
-      destination,
-      '--accept-licenses',
-      '--default-answer',
-      '--confirm-command',
-      'install',
-      optional_components
-    ]
-    let install_cmd = cmd_args.join(' ')
-
-    // Installation of optional components:
-    //
-    // --confirm-command install com.lunarg.vulkan.32bit
-    //                           com.lunarg.vulkan.thirdparty
-    //                           com.lunarg.vulkan.debug
-    //                           com.lunarg.vulkan.debug32
-
-    // The installer must be run as administrator.
-    // powershell.exe Start-Process
-    //   -FilePath 'VulkanSDK-1.3.216.0-Installer.exe'
-    //   -Args '--root C:\VulkanSDK --accept-licenses --default-answer --confirm-command install'
-    //   -Verb runas
-    const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${install_cmd}' -Verb RunAs`
-
-    try {
-      /*let stdout: string = execSync(run_as_admin_cmd).toString().trim()
-      process.stdout.write(stdout)*/
-      execSync(run_as_admin_cmd)
-      install_path = destination
-    } catch (error: any) {
-      core.setFailed(`Installer failed: ${install_cmd}`)
-    }
+    install_path = await install_vulkan_sdk_mac(sdk_path, destination, version, optional_components)
+  } else if (platform.IS_LINUX) {
+    install_path = await install_vulkan_sdk_linux(sdk_path, destination, version, optional_components)
+  } else if (platform.IS_WINDOWS) {
+    install_path = await install_vulkan_sdk_windows(sdk_path, destination, version, optional_components)
   }
 
   core.info(`   Installed into folder: ${install_path}`)
-
   core.addPath(install_path)
+
+  return install_path
+}
+
+export async function install_vulkan_sdk_linux(
+  sdk_path: string,
+  destination: string,
+  version: string,
+  optional_components: string[]
+): Promise<string> {
+  let install_path = await extract_archive(sdk_path, destination)
+
+  return install_path
+}
+
+export async function install_vulkan_sdk_mac(
+  sdk_path: string,
+  destination: string,
+  version: string,
+  optional_components: string[]
+): Promise<string> {
+  let install_path = ''
+
+  // https://vulkan.lunarg.com/doc/view/1.2.189.0/mac/getting_started.html
+  // TODO
+  // 1. mount dmg
+  // 2. build installer cmd
+  //    sudo ./InstallVulkan.app/Contents/MacOS/InstallVulkan --root "installation path" --accept-licenses --default-answer --confirm-command install
+
+  return install_path
+}
+
+/**
+ * Install the Vulkan SDK on a Windows system.
+ *
+ * @param sdk_path - Path to the Vulkan SDK installer executable.
+ * @param destination - Installation destination path.
+ * @param version - Vulkan SDK version.
+ * @param optional_components - Array of optional components to install.
+ * @returns Promise<string> - Installation path.
+ */
+export async function install_vulkan_sdk_windows(
+  sdk_path: string,
+  destination: string,
+  version: string,
+  optional_components: string[]
+): Promise<string> {
+  let install_path = ''
+
+  // arguments for Vulkan-Installer.exe
+  let cmd_args = [
+    '--root',
+    destination,
+    '--accept-licenses',
+    '--default-answer',
+    '--confirm-command',
+    'install',
+    ...optional_components.map(String) // convert each element to a string
+  ]
+
+  let installer_args = cmd_args.join(' ')
+
+  // Notes:
+  // Installation of optional components looks like this:
+  //
+  // --confirm-command install com.lunarg.vulkan.32bit
+  //                           com.lunarg.vulkan.thirdparty
+  //                           com.lunarg.vulkan.debug
+  //                           com.lunarg.vulkan.debug32
+
+  // The full CLI command looks like:
+  // powershell.exe Start-Process
+  //   -FilePath 'VulkanSDK-1.3.216.0-Installer.exe'
+  //   -Args '--root C:\VulkanSDK --accept-licenses --default-answer --confirm-command install'
+  //   -Verb RunAs
+
+  // The installer must be run as administrator.
+  const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${installer_args}' -Verb RunAs`
+
+  try {
+    /*let stdout: string = execSync(run_as_admin_cmd).toString().trim()
+    process.stdout.write(stdout)*/
+    execSync(run_as_admin_cmd)
+    install_path = destination
+  } catch (error: any) {
+    core.setFailed(`Installer failed: ${installer_args}`)
+  }
 
   return install_path
 }
@@ -108,6 +157,18 @@ function verify_installation_of_runtime(sdk_path?: string): boolean {
   let r = false
   if (platform.IS_WINDOWS) {
     const file = `${sdk_path}/runtime/vulkan-1.dll`
+    r = fs.existsSync(file)
+  }
+  return r
+}
+
+function setup_vulkan(sdk_path?: string): boolean {
+  let r = false
+  if (platform.IS_LINUX || platform.IS_MAC) {
+    r = fs.existsSync(`${sdk_path}/bin/vulkaninfo`)
+  }
+  if (platform.IS_WINDOWS) {
+    const file = path.normalize(`${sdk_path}/bin/vulkaninfoSDK.exe`)
     r = fs.existsSync(file)
   }
   return r
