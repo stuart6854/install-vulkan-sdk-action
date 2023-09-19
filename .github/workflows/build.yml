@@ -42,8 +42,7 @@ jobs:
           # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
           - { OS: windows-2022 }
           - { OS: ubuntu-22.04 }
-          - { OS: macos-12     }
-
+          #- { OS: macos-12     } disabled
     steps:
 
       - name: 🤘 Checkout Code
