@@ -27,7 +27,7 @@ async function get_vulkan_sdk(
     restoredFromCache = await cache.restoreCache([destination].slice(), cachePrimaryKey, cacheRestoreKeys)
 
     if (restoredFromCache === undefined) {
-      core.info(`🎯 [Cache] Cache not found.`)
+      core.info(`🎯 [Cache] Cache for 'Vulkan SDK' not found.`)
     } else {
       core.info(
         `🎯 [Cache] Restored Vulkan SDK '${ver}' in path: ${destination}. Cache restore ID '${restoredFromCache}'.`
@@ -67,7 +67,10 @@ async function get_vulkan_runtime(version: string, destination: string, use_cach
   if (use_cache) {
     let restoredFromCache = undefined
     restoredFromCache = await cache.restoreCache([destination], cacheKey, cacheRestoreKeys)
-    if (restoredFromCache !== undefined) {
+
+    if (restoredFromCache === undefined) {
+      core.info(`🎯 [Cache] Cache for 'Vulkan Runtime' not found.`)
+    } else {
       core.info(
         `🎯 [Cache] Restored Vulkan Runtime '${ver}' in path: ${destination}. Cache restore ID '${restoredFromCache}'.`
       )

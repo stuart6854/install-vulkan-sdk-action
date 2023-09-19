@@ -466,7 +466,7 @@ async function get_vulkan_sdk(version, destination, optional_components, use_cac
         // .slice() to workaround https://github.com/actions/toolkit/issues/1377
         restoredFromCache = await cache.restoreCache([destination].slice(), cachePrimaryKey, cacheRestoreKeys);
         if (restoredFromCache === undefined) {
-            core.info(`🎯 [Cache] Cache not found.`);
+            core.info(`🎯 [Cache] Cache for 'Vulkan SDK' not found.`);
         }
         else {
             core.info(`🎯 [Cache] Restored Vulkan SDK '${ver}' in path: ${destination}. Cache restore ID '${restoredFromCache}'.`);
@@ -499,7 +499,10 @@ async function get_vulkan_runtime(version, destination, use_cache) {
     if (use_cache) {
         let restoredFromCache = undefined;
         restoredFromCache = await cache.restoreCache([destination], cacheKey, cacheRestoreKeys);
-        if (restoredFromCache !== undefined) {
+        if (restoredFromCache === undefined) {
+            core.info(`🎯 [Cache] Cache for 'Vulkan Runtime' not found.`);
+        }
+        else {
             core.info(`🎯 [Cache] Restored Vulkan Runtime '${ver}' in path: ${destination}. Cache restore ID '${restoredFromCache}'.`);
             return destination; // Exit early with the cached destination
         }
