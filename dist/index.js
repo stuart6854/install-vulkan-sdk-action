@@ -458,32 +458,24 @@ const version_getter = __importStar(__nccwpck_require__(2853));
 async function get_vulkan_sdk(version, destination, optional_components, use_cache) {
     let install_path;
     let ver = await version_getter.resolve_version(version);
-    const cachePrimaryKey = `vulkan-sdk-${version}-${platform.OS_PLATFORM}-${platform.OS_ARCH}`;
-    const cacheRestoreKeys = ['vulkan-sdk-', 'vulkan-'];
+    const cachePrimaryKey = `cache-vulkan-${version}-${platform.OS_PLATFORM}-${platform.OS_ARCH}`;
+    const cacheRestoreKeys = ['cache-vulkan-'];
     // restore from cache
     if (use_cache) {
-        let cacheKey = undefined;
-        try {
-            // .slice() to workaround https://github.com/actions/toolkit/issues/1377
-            cacheKey = await cache.restoreCache([destination].slice(), cachePrimaryKey, cacheRestoreKeys);
+        let restoredFromCache = undefined;
+        // .slice() to workaround https://github.com/actions/toolkit/issues/1377
+        restoredFromCache = await cache.restoreCache([destination].slice(), cachePrimaryKey, cacheRestoreKeys);
+        if (restoredFromCache === undefined) {
+            core.info(`🎯 [Cache] Cache not found.`);
         }
-        catch (error) {
-            const errorAsError = error;
-            if (errorAsError.name === cache.ValidationError.name) {
-                throw error;
-            }
-            else {
-                core.info(`[warning] There was an error restoring the cache ${errorAsError.message}`);
-            }
-        }
-        if (cacheKey) {
-            console.log(`Found cache for key: ${cacheKey}`);
-            core.info(`🎯 [Cache] Restored Vulkan SDK '${ver}' in path: ${destination}. Cache restore ID '${cacheKey}'.`);
-            core.addPath(destination);
-            return destination;
+        else {
+            core.info(`🎯 [Cache] Restored Vulkan SDK '${ver}' in path: ${destination}. Cache restore ID '${restoredFromCache}'.`);
+            return destination; // Exit early with the cached destination, e.g. C:\VulkanSDK
         }
     }
     // download + install
+    // if use_cache = false (cache is not used)
+    // if use_cache = true && cacheKey = false (cache is used, but not found)
     const vulkan_sdk_path = await downloader.download_vulkan_sdk(ver);
     install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, ver, optional_components);
     // cache install folder
@@ -501,15 +493,15 @@ async function get_vulkan_sdk(version, destination, optional_components, use_cac
 async function get_vulkan_runtime(version, destination, use_cache) {
     let install_path;
     let ver = await version_getter.resolve_version(version);
-    const cacheKey = `vulkan-rt-${version}-${platform.OS_PLATFORM}-${platform.OS_ARCH}`;
+    const cacheKey = `cache-vulkan-rt-${version}-${platform.OS_PLATFORM}-${platform.OS_ARCH}`;
+    const cacheRestoreKeys = ['cache-vulkan-rt-', `cache-vulkan-rt-${version}`];
     // restore from cache
     if (use_cache) {
         let restoredFromCache = undefined;
-        restoredFromCache = await cache.restoreCache([destination], cacheKey);
+        restoredFromCache = await cache.restoreCache([destination], cacheKey, cacheRestoreKeys);
         if (restoredFromCache !== undefined) {
-            core.info(`🎯 [Cache] Restored Vulkan Runtime '${ver}' in path: ${destination}`);
-            core.addPath(destination);
-            return destination;
+            core.info(`🎯 [Cache] Restored Vulkan Runtime '${ver}' in path: ${destination}. Cache restore ID '${restoredFromCache}'.`);
+            return destination; // Exit early with the cached destination
         }
     }
     // download + install
@@ -518,8 +510,8 @@ async function get_vulkan_runtime(version, destination, use_cache) {
     // cache install folder
     if (use_cache) {
         try {
-            await cache.saveCache([install_path], cacheKey);
-            core.info(`🎯 [Cache] Saved Vulkan Runtime '${ver}' in path: ${install_path}`);
+            const cacheId = await cache.saveCache([install_path], cacheKey);
+            core.info(`🎯 [Cache] Saved Vulkan Runtime '${ver}' in path: ${install_path}. Cache saved with ID '${cacheId}'.`);
         }
         catch (error) {
             core.warning(error);
