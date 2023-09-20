@@ -53,11 +53,25 @@ export function validateVersion(version: string): boolean {
   return re.test(version)
 }
 
+export function workspaceDirectory(): string {
+  return process.env[`GITHUB_WORKSPACE`] || ''
+  // const githubWorkspace = process.env['GITHUB_WORKSPACE'] ?? process.cwd()
+}
+
+function workspaceRelativePath(filePath: string): string {
+  return path.relative(process.env['GITHUB_WORKSPACE'] ?? '', filePath)
+}
+
 async function getInputDestination(destination: string): Promise<string> {
   // return default install locations for platform
   if (!destination || destination === '') {
     if (platform.IS_WINDOWS) {
-      destination = 'C:\\VulkanSDK'
+      // Github Actions
+      // destination = 'C:\\VulkanSDK'                                               // nope
+      // destination = path.join(workspaceDirectory(), 'vulkan-sdk')                 // nope
+      // destination = workspaceRelativePath(path.join(process.cwd(), 'vulkan-sdk')) // nope
+      // destination = `${platform.HOME_DIR}/vulkan-sdk`                             // nope = C:\Users\runneradmin\vulkan-sdk\1.3.250.1
+      destination = `C:\\VulkanSDK\\`
     }
     // The .tar.gz file now simply extracts the SDK into a directory of the form 1.x.yy.z.
     // The official docs install into the "~" ($HOME) folder.

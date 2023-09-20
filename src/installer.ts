@@ -102,7 +102,8 @@ export async function install_vulkan_sdk_windows(
 ): Promise<string> {
   let install_path = ''
 
-  // changing the destination to a versionzed folder "C:\VulkanSDK\1.3.250.1"
+  // Warning: The installation path cannot be relative, please specify an absolute path.
+  // Changing the destination to a versionzed folder "C:\VulkanSDK\1.3.250.1"
   const versionized_destination_path = path.normalize(`${destination}/${version}`)
 
   // concatenate arguments for Vulkan-Installer.exe
@@ -112,10 +113,10 @@ export async function install_vulkan_sdk_windows(
     '--accept-licenses',
     '--default-answer',
     '--confirm-command',
-    'install',
-    ...optional_components.map(String) // convert each element to a string
+    'install'
   ]
-  let installer_args = cmd_args.join(' ')
+  let optional_components_args = optional_components.join(' ')
+  let installer_args = cmd_args.join(' ').concat(optional_components_args)
 
   //
   // The full CLI command looks like:
@@ -126,18 +127,20 @@ export async function install_vulkan_sdk_windows(
   //   -Verb RunAs
   //
   // The installer must be run as administrator.
-  const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${installer_args}' -Verb RunAs`
+  const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${installer_args}' -Verb RunAs -Wait`
 
   core.debug(`Command: ${run_as_admin_cmd}`)
 
   try {
-    let stdout: string = execSync(run_as_admin_cmd).toString().trim()
-    process.stdout.write(stdout)
     //execSync(run_as_admin_cmd)
-    install_path = versionized_destination_path
+    let stdout: string = execSync(run_as_admin_cmd, {stdio: 'inherit'}).toString().trim()
+    process.stdout.write(stdout)
   } catch (error: any) {
-    core.setFailed(`Installer failed: ${installer_args}`)
+    core.error(error.toString())
+    core.setFailed(`Installer failed. Arguments used: ${installer_args}`)
   }
+
+  install_path = versionized_destination_path
 
   return install_path
 }

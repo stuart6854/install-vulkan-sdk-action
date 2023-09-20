@@ -6,6 +6,26 @@ import * as installer from './installer'
 import * as path from 'path'
 import * as platform from './platform'
 import * as version_getter from './versiongetter'
+import * as fs from 'fs'
+
+function folderExists(path: string): boolean {
+  try {
+    return fs.existsSync(path) && fs.statSync(path).isDirectory()
+  } catch (err) {
+    return false
+  }
+}
+
+function changePermissionsRecursively(directory: string, permissions: number) {
+  fs.readdirSync(directory).forEach(item => {
+    const itemPath = path.join(directory, item)
+    fs.chmodSync(itemPath, permissions) // change permissions of file
+
+    if (fs.statSync(itemPath).isDirectory()) {
+      changePermissionsRecursively(itemPath, permissions) // recurse directory
+    }
+  })
+}
 
 async function get_vulkan_sdk(
   version: string,
@@ -23,8 +43,7 @@ async function get_vulkan_sdk(
   if (use_cache) {
     let restoredFromCacheId = undefined
 
-    // .slice() to workaround https://github.com/actions/toolkit/issues/1377
-    restoredFromCacheId = await cache.restoreCache([destination].slice(), cachePrimaryKey)
+    restoredFromCacheId = await cache.restoreCache([destination], cachePrimaryKey)
 
     if (restoredFromCacheId === undefined) {
       core.info(`🎯 [Cache] Cache for 'Vulkan SDK' not found.`)
@@ -43,15 +62,40 @@ async function get_vulkan_sdk(
   const vulkan_sdk_path = await downloader.download_vulkan_sdk(version)
   install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, version, optional_components)
 
+  let isAbs = path.isAbsolute(install_path)
+  core.info(`Install Path isAbsolute: '${isAbs}'`)
+
+  const permissions = 0o755
+  changePermissionsRecursively(install_path, permissions)
+
+  if (folderExists(install_path)) {
+    console.log(`Folder ${install_path} exists.`)
+  } else {
+    console.log(`Folder ${install_path} does not exist.`)
+  }
+
+  if (platform.IS_WINDOWS) {
+    install_path = install_path.concat('\\*')
+  }
+
   // cache install folder
   if (use_cache) {
     try {
-      // .slice() to workaround https://github.com/actions/toolkit/issues/1377
-      const cacheId = await cache.saveCache([install_path].slice(), cachePrimaryKey)
-      core.info(`🎯 [Cache] Saved Vulkan SDK '${version}' in path: '${install_path}'. Cache Save ID: '${cacheId}'.`)
+      core.info(`Install Path: '${install_path}'`)
+      core.info(`CachePrimaryKey: '${cachePrimaryKey}'`)
+
+      // broken - https://github.com/actions/cache/issues/862
+      const cacheId = await cache.saveCache([install_path], cachePrimaryKey)
+      if (cacheId != -1) {
+        core.info(`🎯 [Cache] Saved Vulkan SDK '${version}' in path: '${install_path}'. Cache Save ID: '${cacheId}'.`)
+      }
     } catch (error: any) {
       core.warning(error)
     }
+  }
+
+  if (platform.IS_WINDOWS) {
+    install_path = install_path.replace('\\*', '')
   }
 
   return install_path
@@ -113,7 +157,10 @@ async function run(): Promise<void> {
 
     const sdk_path = await get_vulkan_sdk(version, inputs.destination, inputs.optional_components, inputs.use_cache)
 
-    const sdk_versionized_path = path.normalize(`${sdk_path}/${version}`)
+    let sdk_versionized_path = sdk_path
+    if (!sdk_path.includes(version)) {
+      sdk_versionized_path = path.normalize(`${sdk_path}/${version}`)
+    }
 
     // Setup Paths to the Vulkan SDK
     //
