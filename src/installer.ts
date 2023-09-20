@@ -102,9 +102,10 @@ export async function install_vulkan_sdk_windows(
 ): Promise<string> {
   let install_path = ''
 
+  // changing the destination to a versionzed folder "C:\VulkanSDK\1.3.250.1"
   const versionized_destination_path = path.normalize(`${destination}/${version}`)
 
-  // arguments for Vulkan-Installer.exe
+  // concatenate arguments for Vulkan-Installer.exe
   let cmd_args = [
     '--root',
     versionized_destination_path,
@@ -114,31 +115,26 @@ export async function install_vulkan_sdk_windows(
     'install',
     ...optional_components.map(String) // convert each element to a string
   ]
-
   let installer_args = cmd_args.join(' ')
 
-  // Notes:
-  // Installation of optional components looks like this:
   //
-  // --confirm-command install com.lunarg.vulkan.32bit
-  //                           com.lunarg.vulkan.thirdparty
-  //                           com.lunarg.vulkan.debug
-  //                           com.lunarg.vulkan.debug32
-
   // The full CLI command looks like:
+  //
   // powershell.exe Start-Process
   //   -FilePath 'VulkanSDK-1.3.216.0-Installer.exe'
-  //   -Args '--root C:\VulkanSDK --accept-licenses --default-answer --confirm-command install'
+  //   -Args '--root C:\VulkanSDK\1.3.216.0 --accept-licenses --default-answer --confirm-command install com.lunarg.vulkan.debug'
   //   -Verb RunAs
-
+  //
   // The installer must be run as administrator.
   const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${installer_args}' -Verb RunAs`
 
+  core.debug(`Command: ${run_as_admin_cmd}`)
+
   try {
-    /*let stdout: string = execSync(run_as_admin_cmd).toString().trim()
-    process.stdout.write(stdout)*/
-    execSync(run_as_admin_cmd)
-    install_path = destination
+    let stdout: string = execSync(run_as_admin_cmd).toString().trim()
+    process.stdout.write(stdout)
+    //execSync(run_as_admin_cmd)
+    install_path = versionized_destination_path
   } catch (error: any) {
     core.setFailed(`Installer failed: ${installer_args}`)
   }

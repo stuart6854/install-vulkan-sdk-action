@@ -16,7 +16,8 @@ async function get_vulkan_sdk(
   let install_path: string
 
   // "cache-vulkan-sdk-1.3.250.1-linux-x64"
-  const cachePrimaryKey = `cache-vulkan-sdk-${version}-${platform.OS_PLATFORM}-${platform.OS_ARCH}`
+  // note: getPlatform() is used to get "windows", instead of OS_PLATFORM value "win32"
+  const cachePrimaryKey = `cache-vulkan-sdk-${version}-${platform.getPlatform()}-${platform.OS_ARCH}`
 
   // restore from cache
   if (use_cache) {
