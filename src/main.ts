@@ -6,7 +6,6 @@ import * as installer from './installer'
 import * as path from 'path'
 import * as platform from './platform'
 import * as version_getter from './versiongetter'
-import * as fs from 'fs'
 
 async function get_vulkan_sdk(
   version: string,
@@ -107,7 +106,6 @@ async function get_vulkan_runtime(version: string, destination: string, use_cach
 function errorHandler(error: Error): void {
   let message = error.stack || error.message || String(error)
   core.setFailed(message)
-  //process.exit()
 }
 
 async function run(): Promise<void> {
@@ -118,47 +116,55 @@ async function run(): Promise<void> {
 
     const sdk_path = await get_vulkan_sdk(version, inputs.destination, inputs.optional_components, inputs.use_cache)
 
-    let sdk_versionized_path = sdk_path
+    // let install_path be a versionized path to the SDK
+    let install_path = sdk_path
     if (!sdk_path.includes(version)) {
-      sdk_versionized_path = path.normalize(`${sdk_path}/${version}`)
+      install_path = path.normalize(`${sdk_path}/${version}`)
     }
 
-    // Setup Paths to the Vulkan SDK
-    //
-    // https://vulkan.lunarg.com/doc/sdk/1.3.261.1/linux/getting_started.html#set-up-the-runtime-environment
-    //
-    // According to the docs one would "source ~/vulkan/1.x.yy.z/setup-env.sh".
-    // But here we setup our paths by setting these environment variables ourself.
-    // We set PATH, VULKAN_SDK, VK_LAYER_PATH, LD_LIBRARY_PATH and additionally VULKAN_VERSION.
+    if (installer.verify_installation_of_sdk(install_path)) {
+      // Setup Paths to the Vulkan SDK
+      //
+      // https://vulkan.lunarg.com/doc/sdk/1.3.261.1/linux/getting_started.html#set-up-the-runtime-environment
+      //
+      // According to the docs one would "source ~/vulkan/1.x.yy.z/setup-env.sh".
+      // But here we setup our paths by setting these environment variables ourself.
+      // We set PATH, VULKAN_SDK, VK_LAYER_PATH, LD_LIBRARY_PATH and additionally VULKAN_VERSION.
 
-    // export PATH=$VULKAN_SDK/bin:$PATH
-    core.addPath(`${sdk_versionized_path}`)
-    core.info(`✔️ [PATH] Added path to Vulkan SDK to environment variable PATH.`)
+      // export PATH=$VULKAN_SDK/bin:$PATH
+      core.addPath(`${install_path}`)
+      core.info(`✔️ [PATH] Added path to Vulkan SDK to environment variable PATH.`)
 
-    // export VULKAN_SDK=~/vulkan/1.x.yy.z/x86_64
-    core.exportVariable('VULKAN_SDK', sdk_versionized_path)
-    core.info(`✔️ [ENV] Set env variable VULKAN_SDK -> "${sdk_versionized_path}".`)
+      // export VULKAN_SDK=~/vulkan/1.x.yy.z/x86_64
+      core.exportVariable('VULKAN_SDK', install_path)
+      core.info(`✔️ [ENV] Set env variable VULKAN_SDK -> "${install_path}".`)
 
-    core.exportVariable('VULKAN_VERSION', version)
-    core.info(`✔️ [ENV] Set env variable VULKAN_VERSION -> "${version}".`)
+      core.exportVariable('VULKAN_VERSION', version)
+      core.info(`✔️ [ENV] Set env variable VULKAN_VERSION -> "${version}".`)
 
-    if (platform.IS_LINUX) {
-      // export VK_LAYER_PATH=$VULKAN_SDK/etc/vulkan/explicit_layer.d
-      const vk_layer_path = `${sdk_versionized_path}/etc/vulkan/explicit_layer.d`
-      core.exportVariable('VK_LAYER_PATH', vk_layer_path)
-      core.info(`✔️ [ENV] Set env variable VK_LAYER_PATH -> "${vk_layer_path}".`)
+      if (platform.IS_LINUX) {
+        // export VK_LAYER_PATH=$VULKAN_SDK/etc/vulkan/explicit_layer.d
+        const vk_layer_path = `${install_path}/etc/vulkan/explicit_layer.d`
+        core.exportVariable('VK_LAYER_PATH', vk_layer_path)
+        core.info(`✔️ [ENV] Set env variable VK_LAYER_PATH -> "${vk_layer_path}".`)
 
-      // export LD_LIBRARY_PATH=$VULKAN_SDK/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-      const ld_library_path = process.env.LD_LIBRARY_PATH || ''
-      const vk_ld_library_path = `${sdk_versionized_path}/lib:${ld_library_path}`
-      core.exportVariable('LD_LIBRARY_PATH', vk_ld_library_path)
-      core.info(`✔️ [ENV] Set env variable LD_LIBRARY_PATH -> "${vk_ld_library_path}".`)
+        // export LD_LIBRARY_PATH=$VULKAN_SDK/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+        const ld_library_path = process.env.LD_LIBRARY_PATH || ''
+        const vk_ld_library_path = `${install_path}/lib:${ld_library_path}`
+        core.exportVariable('LD_LIBRARY_PATH', vk_ld_library_path)
+        core.info(`✔️ [ENV] Set env variable LD_LIBRARY_PATH -> "${vk_ld_library_path}".`)
+      }
+    } else {
+      core.warning(`Could not find Vulkan SDK in ${install_path}`)
     }
 
     if (inputs.install_runtime && platform.IS_WINDOWS) {
       const install_path = await get_vulkan_runtime(version, inputs.destination, inputs.use_cache)
-
-      core.info(`✔️ [INFO] Path to Vulkan Runtime: ${install_path}`)
+      if (installer.verify_installation_of_runtime(install_path)) {
+        core.info(`✔️ [INFO] Path to Vulkan Runtime: ${install_path}`)
+      } else {
+        core.warning(`Could not find Vulkan Runtime in ${install_path}`)
+      }
     }
   } catch (error: any) {
     errorHandler(error as Error)

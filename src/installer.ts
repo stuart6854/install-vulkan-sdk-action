@@ -180,19 +180,20 @@ async function extract_archive(file: string, destination: string): Promise<strin
   return await extract(file, destination)
 }
 
-function verify_installation_of_sdk(sdk_path?: string): boolean {
+export function verify_installation_of_sdk(sdk_path?: string): boolean {
   let r = false
+  let file = `${sdk_path}/bin/vulkaninfo`
   if (platform.IS_LINUX || platform.IS_MAC) {
-    r = fs.existsSync(`${sdk_path}/bin/vulkaninfo`)
+    file = `${sdk_path}/bin/vulkaninfo`
   }
   if (platform.IS_WINDOWS) {
-    const file = path.normalize(`${sdk_path}/bin/vulkaninfoSDK.exe`)
-    r = fs.existsSync(file)
+    file = path.normalize(`${sdk_path}/bin/vulkaninfoSDK.exe`)
   }
+  r = fs.existsSync(file)
   return r
 }
 
-function verify_installation_of_runtime(sdk_path?: string): boolean {
+export function verify_installation_of_runtime(sdk_path?: string): boolean {
   let r = false
   if (platform.IS_WINDOWS) {
     const file = `${sdk_path}/runtime/vulkan-1.dll`

@@ -58,6 +58,7 @@ jobs:
           # should say version not available
           # should print list of valid versions
           #vulkan_version: 1.2.3.4
+          optional_components: com.lunarg.vulkan.vma
           cache: true
 
       - name: Show Env Vars and SDK folder (Linux)
