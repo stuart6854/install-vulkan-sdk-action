@@ -10,21 +10,28 @@ A Github Action to install the Vulkan SDK and it's runtime.
 - The SDK version number is automatically fetched via the Web API, if not set to a fixed version number manually.
 - The installation of optional SDK components is supported.
 - Reducing the size of the installed SDK to have a smaller cache package size on CI is on our [todo list](https://github.com/jakoch/install-vulkan-sdk-action/issues/247).
+- The installation on MacOS is on our [todo list](https://github.com/jakoch/install-vulkan-sdk-action/issues/293).
 
 ---
 
 - [Github Action: Install Vulkan SDK](#github-action-install-vulkan-sdk)
+  - [What is Vulkan?](#what-is-vulkan)
   - [Usage](#usage)
     - [Quick start](#quick-start)
   - [Action Reference](#action-reference)
     - [Inputs](#inputs)
     - [Outputs](#outputs)
     - [Environment Variables](#environment-variables)
-  - [Keep up-to-date with GitHub Dependabot](#keep-up-to-date-with-github-dependabot)
-  - [Vulkan](#vulkan)
-    - [Websites](#websites)
-    - [What is Vulkan?](#what-is-vulkan)
   - [License](#license)
+
+## What is Vulkan?
+
+> The [Khronos Vulkan API](https://khronos.org/registry/vulkan) is an explicit, low-overhead, cross-platform graphics and compute API. Vulkan provides applications with control over the system execution and the system memory to maximize application efficiency on a wide variety of devices from PCs and consoles to mobile phones and embedded platforms.
+>
+> The Vulkan SDK enables Vulkan developers to develop Vulkan applications.
+>
+
+Links: <https://vulkan.org/> | [Vulkan SDK](https://vulkan.lunarg.com/) | [Vulkan SDK Docs](https://vulkan.lunarg.com/doc/sdk/) | [Vulkan Tools](https://vulkan.org/tools)
 
 ## Usage
 
@@ -80,49 +87,12 @@ The following output variables are available:
 
 The following environment variables are set:
 
-| Name             | Type    |  Description                                   |
-|------------------|---------|------------------------------------------------|
-| `VULKAN_VERSION` | String  | The installed Vulkan SDK version.              |
-| `VULKAN_SDK`     | String  | The location of your Vulkan SDK files          |
-
-## Keep up-to-date with GitHub Dependabot
-
-Dependabot has native GitHub Actions support.
-To enable it for your Github repo you just need to add a `.github/dependabot.yml` file:
-
-    version: 2
-    updates:
-      # Maintain dependencies for GitHub Actions
-      - package-ecosystem: "github-actions"
-        directory: "/"
-        schedule:
-          interval: "weekly"
-
-## Vulkan
-
-### Websites
-
-- <https://vulkan.org/>
-- Vulkan SDK: <https://vulkan.lunarg.com/>
-- Vulkan SDK Docs: <https://vulkan.lunarg.com/doc/sdk/>
-- Vulkan Tools: <https://vulkan.org/tools>
-- Vulkan SDK Version Query and Download API: <https://vulkan.lunarg.com/content/view/latest-sdk-version-api>
-
-### What is Vulkan?
-
-> The [Khronos Vulkan API](https://khronos.org/registry/vulkan) is an explicit, low-overhead, cross-platform graphics and compute API. Vulkan provides applications with control over the system execution and the system memory to maximize application efficiency on a wide variety of devices from PCs and consoles to mobile phones and embedded platforms.
->
-> The Vulkan SDK enables Vulkan developers to develop Vulkan applications. It includes:
->
-> - Vulkan API usage validation thanks to the [Khronos Validation layer](https://vulkan.lunarg.com/doc/view/latest/mac/getting_started.html#user-content-vulkan-api-validation-with-khronos-validation-layer).
-> - Vulkan Layers configuration thanks to [Vulkan Configurator](https://vulkan.lunarg.com/doc/view/latest/mac/getting_started.html#user-content-vulkan-configurator).
-> - SPIR‑V Shader compilation, optimization and validation thanks to [DXC](https://vulkan.lunarg.com/doc/view/latest/linux/DXC.html), [SPIR‑V Tools](https://vulkan.lunarg.com/doc/view/latest/linux/spirv_toolchain.html), [SPIR‑V Cross](https://vulkan.lunarg.com/doc/view/latest/linux/spirv_toolchain.html#user-content-spir-v-cross-compilation-and-reflection) and [MoltenVKShaderConverter](https://github.com/KhronosGroup/MoltenVK/blob/master/Docs/MoltenVK_Runtime_UserGuide.md#shader_converter_tool) (for MacOS).
-> - Vulkan API capture and replay for Vulkan debugging thanks to [GFXReconstruct](https://vulkan.lunarg.com/doc/view/latest/windows/getting_started.html#user-content-vulkan-api-capture-and-replay-with-gfxreconstruct).
-> - [Vulkan system report](https://vulkan.lunarg.com/doc/view/1.2.189.2/windows/getting_started.html#user-content-verify-the-sdk-installation) thanks to Vulkan Installation Analyzer (VIA) and Vulkan Info.
-> - [Vulkan demos](https://vulkan.lunarg.com/doc/view/1.2.189.2/windows/getting_started.html#user-content-build-the-demo-programs) code.
-> - Third-party libraries such as [GLM](https://github.com/g-truc/glm) and [SDL](https://www.libsdl.org/).
->
-> -- <cite>https://vulkan.lunarg.com/doc/sdk/latest/windows/getting_started.html</cite>
+| Name              | Type    |  Description                                   |
+|-------------------|---------|------------------------------------------------|
+| `VULKAN_VERSION`  | String  | The installed Vulkan SDK version.              |
+| `VULKAN_SDK`      | String  | The location of your Vulkan SDK files          |
+| `VK_LAYER_PATH`   | String  | Linux only: The location of /etc/vulkan/explicit_layer.d  |
+| `LD_LIBRARY_PATH` | String  | Linux only: path to vulkan library  |
 
 ## License
 

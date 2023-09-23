@@ -67,17 +67,17 @@ jobs:
           echo PATH = $PATH
           echo VULKAN_VERSION = $VULKAN_VERSION
           echo VULKAN_SDK = $VULKAN_SDK
-          echo Directory Size = `du -hs $VULKAN_SDK`
+          echo VK_LAYER_PATH = $VK_LAYER_PATH
+          echo LD_LIBRARY_PATH = $LD_LIBRARY_PATH
+          echo Folder size = `du -hs $VULKAN_SDK`
 
       - name: Show Env Vars and SDK folder (Windows)
         if: contains(matrix.config.OS, 'windows')
+        working-directory: ${{env.VULKAN_SDK}}
         run: |
           echo $env:PATH
           echo $env:VULKAN_VERSION
           echo $env:VULKAN_SDK
-
-      - name: Show VulkanSDK folder (Windows)
-        if: contains(matrix.config.OS, 'windows')
-        shell: cmd
-        run: |
-          dir /S /B C:\VulkanSDK
+          Get-ChildItem -File -Recurse
+          $folderSizeMB = (Get-ChildItem -File -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
+          "Folder size: {0:N2} MB" -f $folderSizeMB
