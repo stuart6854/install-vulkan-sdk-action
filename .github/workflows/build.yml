@@ -60,6 +60,7 @@ jobs:
           #vulkan_version: 1.2.3.4
           optional_components: com.lunarg.vulkan.vma
           cache: true
+          stripdown: true
 
       - name: Show Env Vars and SDK folder (Linux)
         if: contains(matrix.config.OS, 'ubuntu')

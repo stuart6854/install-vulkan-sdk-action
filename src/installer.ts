@@ -200,3 +200,45 @@ export function verify_installation_of_runtime(sdk_path?: string): boolean {
   }
   return r
 }
+
+function remove_folder_if_exists(folder: string): boolean {
+  try {
+    if (fs.existsSync(folder)) {
+      fs.rmdirSync(folder, {recursive: true})
+      core.info(`Folder ${folder} removed successfully.`)
+      return true
+    } else {
+      core.info(`Folder ${folder} doesn't exist.`)
+    }
+  } catch (error) {
+    console.error(`Error removing folder: ${error}`)
+  }
+
+  return false
+}
+
+function remove_folders_if_exist(folders: string[]): void {
+  folders.forEach(folder => {
+    remove_folder_if_exists(folder)
+  })
+}
+
+export function stripdown_installation_of_sdk(sdk_path?: string): void {
+  if (platform.IS_WINDOWS) {
+    let folders_to_delete: string[] = []
+
+    folders_to_delete = [
+      `${sdk_path}\\Demos`,
+      `${sdk_path}\\Helpers`,
+      `${sdk_path}\\installerResources`,
+      `${sdk_path}\\Licenses`,
+      `${sdk_path}\\Templates`
+      // old installers had
+      //`${sdk_path}\\Bin32`,
+      //`${sdk_path}\\Tools32`,
+      //`${sdk_path}\\Lib32`,
+    ]
+
+    remove_folders_if_exist(folders_to_delete)
+  }
+}

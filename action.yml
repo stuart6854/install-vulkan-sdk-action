@@ -6,7 +6,7 @@
 #
 
 name: "Install Vulkan SDK"
-description: "Installs the current Vulkan SDK"
+description: "Installs the Vulkan SDK"
 author: 'jakoch'
 branding:
   color: 'blue'
@@ -27,6 +27,9 @@ inputs:
     required: false
   install_runtime:
     description: "Windows only. Installs the vulkan runtime (vulkan-1.dll). Default: false."
+    required: false
+  stripdown:
+    description: "Reduces the Vulkan SDK size before caching. Default: false."
     required: false
 
 outputs:

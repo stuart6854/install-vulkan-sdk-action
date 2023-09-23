@@ -11,7 +11,8 @@ async function get_vulkan_sdk(
   version: string,
   destination: string,
   optional_components: string[],
-  use_cache: boolean
+  use_cache: boolean,
+  stripdown: boolean
 ): Promise<string> {
   let install_path: string
 
@@ -39,6 +40,9 @@ async function get_vulkan_sdk(
 
   // cache install folder
   if (use_cache) {
+    if (stripdown) {
+      installer.stripdown_installation_of_sdk(install_path)
+    }
     try {
       const cacheId = await cache.saveCache([install_path], cachePrimaryKey)
       if (cacheId != -1) {
@@ -102,7 +106,13 @@ async function run(): Promise<void> {
 
     const version = await version_getter.resolve_version(inputs.version)
 
-    const sdk_path = await get_vulkan_sdk(version, inputs.destination, inputs.optional_components, inputs.use_cache)
+    const sdk_path = await get_vulkan_sdk(
+      version,
+      inputs.destination,
+      inputs.optional_components,
+      inputs.use_cache,
+      inputs.stripdown
+    )
 
     // let install_path be a versionized path to the SDK
     let install_path = sdk_path

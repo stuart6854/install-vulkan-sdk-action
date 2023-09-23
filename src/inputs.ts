@@ -9,6 +9,7 @@ export interface Inputs {
   install_runtime: boolean
   use_cache: boolean
   optional_components: string[]
+  stripdown: boolean
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -21,7 +22,8 @@ export async function getInputs(): Promise<Inputs> {
     destination: await getInputDestination(core.getInput('destination', {required: false})),
     install_runtime: /true/i.test(core.getInput('install_runtime', {required: false})),
     use_cache: /true/i.test(core.getInput('cache', {required: false})),
-    optional_components: await getInputOptionalComponents(core.getInput('optional_components', {required: false}))
+    optional_components: await getInputOptionalComponents(core.getInput('optional_components', {required: false})),
+    stripdown: /true/i.test(core.getInput('stripdown', {required: false}))
   }
 }
 
@@ -51,15 +53,6 @@ export function validateVersion(version: string): boolean {
   if (version === 'latest') return true
   const re = /^\d+\.\d+\.\d+\.\d+$/
   return re.test(version)
-}
-
-export function workspaceDirectory(): string {
-  return process.env[`GITHUB_WORKSPACE`] || ''
-  // const githubWorkspace = process.env['GITHUB_WORKSPACE'] ?? process.cwd()
-}
-
-function workspaceRelativePath(filePath: string): string {
-  return path.relative(process.env['GITHUB_WORKSPACE'] ?? '', filePath)
 }
 
 async function getInputDestination(destination: string): Promise<string> {
