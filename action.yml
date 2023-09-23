@@ -38,18 +38,3 @@ outputs:
 runs:
   using: 'node16'
   main: 'dist/index.js'
-
-# TODO     - name: ✂ Reduce VULKAN_SDK size before caching
-#       shell: pwsh
-#       if: ${{ env:INPUT_INSTALL == true }}
-#       run: |
-#         cd "${env:VULKAN_SDK}"
-#         "Folder size before: {0:N2} MB" -f ((ls . -r | Measure-Object -Property Length -Sum).Sum / 1MB)
-#         Remove-Item -Recurse -Force "Bin32"
-#         Remove-Item -Recurse -Force "Demos"
-#         Remove-Item -Recurse -Force "Lib32"
-#         Remove-Item -Recurse -Force "Templates"
-#         Remove-Item -Recurse -Force "Third-Party"
-#         Remove-Item -Recurse -Force "Tools"
-#         Remove-Item -Recurse -Force "Tools32"
-#         "Folder size after: {0:N2} MB" -f ((ls . -r | Measure-Object -Property Length -Sum).Sum / 1MB)

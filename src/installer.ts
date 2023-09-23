@@ -106,17 +106,16 @@ export async function install_vulkan_sdk_windows(
   // Changing the destination to a versionzed folder "C:\VulkanSDK\1.3.250.1"
   const versionized_destination_path = path.normalize(`${destination}/${version}`)
 
-  // concatenate arguments for Vulkan-Installer.exe
   let cmd_args = [
     '--root',
     versionized_destination_path,
     '--accept-licenses',
     '--default-answer',
     '--confirm-command',
-    'install'
+    'install',
+    ...optional_components
   ]
-  let optional_components_args = optional_components.join(' ')
-  let installer_args = cmd_args.join(' ').concat(optional_components_args)
+  let installer_args = cmd_args.join(' ')
 
   //
   // The full CLI command looks like:
