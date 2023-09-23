@@ -61,7 +61,7 @@ The following inputs can be used as `steps.with` keys:
 
 | Name               | Type    | Description                           | Default                 | Required |
 |--------------------|---------|---------------------------------------|-------------------------|----------|
-| `vulkan-version`   | String  | A Vulkan SDK version (eg. `1.3.231.1`). | If `vulkan_version` is not set, the latest version is used. | false |
+| `vulkan_version`   | String  | A Vulkan SDK version (eg. `1.3.231.1`). | If `vulkan_version` is not set, the latest version is used. | false |
 | `destination`      | String  | The Vulkan SDK installation folder.     | Windows: `C:\VulkanSDK`. Linux/MacOS: `%HOME` | false |
 | `install_runtime`  | bool    | Windows only. Installs the vulkan runtime ('vulkan-1.dll') into a `runtime` folder inside `destination`, if true. Windows: `C:\VulkanSDK\runtime`. | true | false |
 | `use_cache`        | bool    | Cache the Vulkan installation folder. | true | false |
