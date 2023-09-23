@@ -204,7 +204,7 @@ export function verify_installation_of_runtime(sdk_path?: string): boolean {
 function remove_folder_if_exists(folder: string): boolean {
   try {
     if (fs.existsSync(folder)) {
-      fs.rmdirSync(folder, {recursive: true})
+      fs.rmSync(folder, { recursive: true })
       core.info(`Folder ${folder} removed successfully.`)
       return true
     } else {
@@ -224,6 +224,7 @@ function remove_folders_if_exist(folders: string[]): void {
 }
 
 export function stripdown_installation_of_sdk(sdk_path?: string): void {
+  core.info(`✂ Reducing Vulkan SDK size before caching`)
   if (platform.IS_WINDOWS) {
     let folders_to_delete: string[] = []
 
