@@ -21,17 +21,12 @@ async function get_vulkan_sdk(
 
   // restore from cache
   if (use_cache) {
-    let restoredFromCacheId = undefined
-
-    restoredFromCacheId = await cache.restoreCache([destination], cachePrimaryKey)
-
-    if (restoredFromCacheId === undefined) {
+    let cacheHit = undefined
+    cacheHit = await cache.restoreCache([destination], cachePrimaryKey)
+    if (cacheHit === undefined) {
       core.info(`🎯 [Cache] Cache for 'Vulkan SDK' not found.`)
     } else {
-      core.info(
-        `🎯 [Cache] Restored Vulkan SDK '${version}' in path: '${destination}'. Cache Restore ID: '${restoredFromCacheId}'.`
-      )
-
+      core.info(`🎯 [Cache] Restored Vulkan SDK in path: '${destination}'. Cache Restore ID: '${cacheHit}'.`)
       return destination // Exit early with the cached destination, e.g. C:\VulkanSDK
     }
   }
@@ -47,13 +42,12 @@ async function get_vulkan_sdk(
     try {
       const cacheId = await cache.saveCache([install_path], cachePrimaryKey)
       if (cacheId != -1) {
-        core.info(`🎯 [Cache] Saved Vulkan SDK '${version}' in path: '${install_path}'. Cache Save ID: '${cacheId}'.`)
+        core.info(`🎯 [Cache] Saved Vulkan SDK in path: '${install_path}'. Cache Save ID: '${cacheId}'.`)
       }
     } catch (error: any) {
       core.warning(error)
     }
   }
-
   return install_path
 }
 
@@ -66,16 +60,12 @@ async function get_vulkan_runtime(version: string, destination: string, use_cach
 
   // restore from cache
   if (use_cache) {
-    let restoredFromCacheId = undefined
-    restoredFromCacheId = await cache.restoreCache([destination], cacheKey)
-
-    if (restoredFromCacheId === undefined) {
+    let cacheHit = undefined
+    cacheHit = await cache.restoreCache([destination], cacheKey)
+    if (cacheHit === undefined) {
       core.info(`🎯 [Cache] Cache for 'Vulkan Runtime' not found.`)
     } else {
-      core.info(
-        `🎯 [Cache] Restored Vulkan Runtime '${version}' in path: '${destination}'. Cache Restore ID: '${restoredFromCacheId}'.`
-      )
-
+      core.info(`🎯 [Cache] Restored Vulkan Runtime in path: '${destination}'. Cache Restore ID: '${cacheHit}'.`)
       return destination // Exit early with the cached destination
     }
   }
@@ -88,7 +78,7 @@ async function get_vulkan_runtime(version: string, destination: string, use_cach
   if (use_cache) {
     try {
       const cacheId = await cache.saveCache([install_path], cacheKey)
-      core.info(`🎯 [Cache] Saved Vulkan Runtime '${version}' in path: '${install_path}'. Cache Save ID: '${cacheId}'.`)
+      core.info(`🎯 [Cache] Saved Vulkan Runtime in path: '${install_path}'. Cache Save ID: '${cacheId}'.`)
     } catch (error: any) {
       core.warning(error)
     }
