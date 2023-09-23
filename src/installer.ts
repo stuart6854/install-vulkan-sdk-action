@@ -126,15 +126,17 @@ export async function install_vulkan_sdk_windows(
   //   -Args '--root C:\VulkanSDK\1.3.216.0 --accept-licenses --default-answer --confirm-command install com.lunarg.vulkan.debug'
   //   -Verb RunAs
   //
-  // The installer must be run as administrator.
+  // Important:
+  // 1. The installer must be run as administrator.
+  // 2. Keep the "-Wait", because the installer process needs to finish writing all files and folders be we can proceed.
   const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${installer_args}' -Verb RunAs -Wait`
 
   core.debug(`Command: ${run_as_admin_cmd}`)
 
   try {
-    //execSync(run_as_admin_cmd)
-    let stdout: string = execSync(run_as_admin_cmd, {stdio: 'inherit'}).toString().trim()
-    process.stdout.write(stdout)
+    execSync(run_as_admin_cmd)
+    //let stdout: string = execSync(run_as_admin_cmd, {stdio: 'inherit'}).toString().trim()
+    //process.stdout.write(stdout)
   } catch (error: any) {
     core.error(error.toString())
     core.setFailed(`Installer failed. Arguments used: ${installer_args}`)
