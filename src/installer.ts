@@ -184,7 +184,7 @@ export function verify_installation_of_sdk(sdk_path?: string): boolean {
   let r = false
   let file = `${sdk_path}/bin/vulkaninfo`
   if (platform.IS_LINUX || platform.IS_MAC) {
-    file = `${sdk_path}/bin/vulkaninfo`
+    file = `${sdk_path}/x86_64/bin/vulkaninfo`
   }
   if (platform.IS_WINDOWS) {
     file = path.normalize(`${sdk_path}/bin/vulkaninfoSDK.exe`)

@@ -45,10 +45,6 @@ async function get_vulkan_sdk(
   // cache install folder
   if (use_cache) {
     try {
-      core.info(`Install Path: '${install_path}'`)
-      core.info(`CachePrimaryKey: '${cachePrimaryKey}'`)
-
-      // broken - https://github.com/actions/cache/issues/862
       const cacheId = await cache.saveCache([install_path], cachePrimaryKey)
       if (cacheId != -1) {
         core.info(`🎯 [Cache] Saved Vulkan SDK '${version}' in path: '${install_path}'. Cache Save ID: '${cacheId}'.`)
@@ -64,7 +60,9 @@ async function get_vulkan_sdk(
 async function get_vulkan_runtime(version: string, destination: string, use_cache: boolean): Promise<string> {
   let install_path: string
 
-  const cacheKey = `cache-vulkan-rt-${version}-${platform.OS_PLATFORM}-${platform.OS_ARCH}`
+  // "cache-vulkan-sdk-1.3.250.1-windows-x64"
+  // note: getPlatform() is used to get "windows", instead of OS_PLATFORM value "win32"
+  const cacheKey = `cache-vulkan-rt-${version}-${platform.getPlatform()}-${platform.OS_ARCH}`
 
   // restore from cache
   if (use_cache) {
