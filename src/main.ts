@@ -76,7 +76,7 @@ async function get_vulkan_runtime(version: string, destination: string, use_cach
 
   // download + install
   const vulkan_runtime_path = await downloader.download_vulkan_runtime(version)
-  install_path = await installer.install_vulkan_runtime(vulkan_runtime_path, destination)
+  install_path = await installer.install_vulkan_runtime(vulkan_runtime_path, destination, version)
 
   // cache install folder
   if (use_cache) {

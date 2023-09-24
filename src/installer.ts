@@ -22,14 +22,17 @@ export async function install_vulkan_sdk(
 ): Promise<string> {
   let install_path = ''
 
+  // Changing the destination to a versionzed folder "C:\VulkanSDK\1.3.250.1"
+  const versionized_destination_path = path.normalize(`${destination}/${version}`)
+
   core.info(`📦 Extracting Vulkan SDK...`)
 
   if (platform.IS_MAC) {
-    install_path = await install_vulkan_sdk_mac(sdk_path, destination, version, optional_components)
+    install_path = await install_vulkan_sdk_mac(sdk_path, versionized_destination_path, optional_components)
   } else if (platform.IS_LINUX) {
-    install_path = await install_vulkan_sdk_linux(sdk_path, destination, version, optional_components)
+    install_path = await install_vulkan_sdk_linux(sdk_path, versionized_destination_path, optional_components)
   } else if (platform.IS_WINDOWS) {
-    install_path = await install_vulkan_sdk_windows(sdk_path, destination, version, optional_components)
+    install_path = await install_vulkan_sdk_windows(sdk_path, versionized_destination_path, optional_components)
   }
 
   core.info(`   Installed into folder: ${install_path}`)
@@ -43,14 +46,12 @@ export async function install_vulkan_sdk(
  *
  * @param sdk_path - Path to the Vulkan SDK installer executable.
  * @param destination - Installation destination path.
- * @param version - Vulkan SDK version.
  * @param optional_components - Array of optional components to install.
  * @returns Promise<string> - Installation path.
  */
 export async function install_vulkan_sdk_linux(
   sdk_path: string,
   destination: string,
-  version: string,
   optional_components: string[]
 ): Promise<string> {
   let install_path = await extract_archive(sdk_path, destination)
@@ -63,14 +64,12 @@ export async function install_vulkan_sdk_linux(
  *
  * @param sdk_path - Path to the Vulkan SDK installer executable.
  * @param destination - Installation destination path.
- * @param version - Vulkan SDK version.
  * @param optional_components - Array of optional components to install.
  * @returns Promise<string> - Installation path.
  */
 export async function install_vulkan_sdk_mac(
   sdk_path: string,
   destination: string,
-  version: string,
   optional_components: string[]
 ): Promise<string> {
   let install_path = ''
@@ -90,25 +89,20 @@ export async function install_vulkan_sdk_mac(
  *
  * @param sdk_path - Path to the Vulkan SDK installer executable.
  * @param destination - Installation destination path.
- * @param version - Vulkan SDK version.
  * @param optional_components - Array of optional components to install.
  * @returns Promise<string> - Installation path.
  */
 export async function install_vulkan_sdk_windows(
   sdk_path: string,
   destination: string,
-  version: string,
   optional_components: string[]
 ): Promise<string> {
-  let install_path = ''
-
   // Warning: The installation path cannot be relative, please specify an absolute path.
   // Changing the destination to a versionzed folder "C:\VulkanSDK\1.3.250.1"
-  const versionized_destination_path = path.normalize(`${destination}/${version}`)
 
   let cmd_args = [
     '--root',
-    versionized_destination_path,
+    destination,
     '--accept-licenses',
     '--default-answer',
     '--confirm-command',
@@ -142,9 +136,7 @@ export async function install_vulkan_sdk_windows(
     core.setFailed(`Installer failed. Arguments used: ${installer_args}`)
   }
 
-  install_path = versionized_destination_path
-
-  return install_path
+  return destination
 }
 
 // Problem: extracting the zip would create a top-level folder,
@@ -153,9 +145,14 @@ export async function install_vulkan_sdk_windows(
 // and then move the contents of the top-level folder within the temp dir
 // to the runtime_destination without moving the top-level folder itself.
 // Goal is to have: C:\VulkanSDK\runtime\x64\vulkan-1.dll
-export async function install_vulkan_runtime(runtime_path: string, destination: string): Promise<string> {
+export async function install_vulkan_runtime(
+  runtime_path: string,
+  destination: string,
+  version: string
+): Promise<string> {
   core.info(`📦 Extracting Vulkan Runtime (➔ vulkan-1.dll) ...`)
-  const install_path = path.normalize(`${destination}/runtime`) // C:/VulkanSDK/runtime
+  const versionized_destination_path = path.normalize(`${destination}/${version}`) // C:\VulkanSDK\1.3.250.1
+  const install_path = path.normalize(`${versionized_destination_path}/runtime`) // C:\VulkanSDK\1.3.250.1\runtime
   const temp_install_path = path.normalize(`${platform.TEMP_DIR}/vulkan-runtime`) // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime
   await extract_archive(runtime_path, temp_install_path)
   const top_level_folder = fs.readdirSync(temp_install_path)[0] // VulkanRT-1.3.250.1-Components
