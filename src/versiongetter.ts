@@ -9,6 +9,8 @@ import * as platform from './platform'
  * Latest Version Response.
  *
  * @see https://vulkan.lunarg.com/sdk/versions.json
+ *
+ * @interface LatestVersionResponse
  */
 interface LatestVersionResponse {
   windows: string
@@ -21,12 +23,19 @@ interface LatestVersionResponse {
  *
  * @see https://vulkan.lunarg.com/sdk/versions.json (version list regardless of platform)
  * @see https://vulkan.lunarg.com/sdk/versions/${PLATFORM_NAME}.json
+ *
+ * @interface AvailableVersions
  */
 interface AvailableVersions {
   versions: string[]
 }
 
-// get list of all available versions for this platform
+/**
+ * Get list of all available versions for this platform.
+ *
+ * @export
+ * @return {*}  {(Promise<AvailableVersions | null>)}
+ */
 export const getAvailableVersions = async (): Promise<AvailableVersions | null> => {
   const platformName = platform.getPlatform()
   const url = `https://vulkan.lunarg.com/sdk/versions/${platformName}.json`
@@ -36,7 +45,12 @@ export const getAvailableVersions = async (): Promise<AvailableVersions | null> 
   }
   return response.result
 }
-
+/**
+ * Get the list of latest versions.
+ *
+ * @export
+ * @return {*}  {(Promise<LatestVersionResponse | null>)}
+ */
 export const getLatestVersions = async (): Promise<LatestVersionResponse | null> => {
   const url = `https://vulkan.lunarg.com/sdk/latest.json`
   const response = await http.client.getJson<LatestVersionResponse>(url)
@@ -46,11 +60,19 @@ export const getLatestVersions = async (): Promise<LatestVersionResponse | null>
   return response.result
 }
 
-// This function resolves the string literal "latest" to the latest version number.
-// "latest" might be set by the user or during input validation, when the version field is empty.
-// The version to download is either
-//    a) a manually passed in version (pass-through)
-// or b) the automatically resolved latest version for the platform.
+/**
+ * resolve_version
+ *
+ * This function resolves the string literal "latest" to the latest version number.
+ * "latest" might be set by the user or during input validation, when the version field is empty.
+ * The version to download is either
+ *    a) a manually passed in version (pass-through)
+ * or b) the automatically resolved latest version for the platform.
+ *
+ * @export
+ * @param {string} version
+ * @return {*}  {Promise<string>}
+ */
 export async function resolve_version(version: string): Promise<string> {
   let versionToDownload: string = version
   if (version === 'latest') {
@@ -71,7 +93,13 @@ export async function resolve_version(version: string): Promise<string> {
   return versionToDownload
 }
 
-// get latest version for platform. they might have a different latest version! ¯\_(ツ)_/¯
+/**
+ * get latest version for platform.
+ * they might have a different latest version! ¯\\_(ツ)_/¯
+ *
+ * @param {LatestVersionResponse} latestVersion
+ * @return {*}  {string}
+ */
 function getLatestVersionForPlatform(latestVersion: LatestVersionResponse): string {
   if (platform.IS_WINDOWS) {
     return latestVersion.windows

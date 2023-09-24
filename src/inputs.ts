@@ -3,6 +3,12 @@ import * as path from 'path'
 import * as platform from './platform'
 import * as version_getter from './versiongetter'
 
+/**
+ * List of available Input arguments
+ *
+ * @export
+ * @interface Inputs
+ */
 export interface Inputs {
   version: string
   destination: string
@@ -11,7 +17,12 @@ export interface Inputs {
   optional_components: string[]
   stripdown: boolean
 }
-
+/**
+ * Handles the incomming arguments for the action.
+ *
+ * @export
+ * @return {*}  {Promise<Inputs>}
+ */
 export async function getInputs(): Promise<Inputs> {
   return {
     // Warning: This is intentionally "vulkan_version" to avoid unexpected behavior due to naming conflicts.
@@ -26,35 +37,51 @@ export async function getInputs(): Promise<Inputs> {
     stripdown: /true/i.test(core.getInput('stripdown', {required: false}))
   }
 }
-
-export async function getInputVersion(version: string): Promise<string> {
-  let requestedVersion: string = version
-
+/**
+ * GetInputVersion accepts a version and validates it or if version is
+ *
+ * @export
+ * @param {string} requested_version
+ * @return {*}  {Promise<string>}
+ */
+export async function getInputVersion(requested_version: string): Promise<string> {
   // throw error, if requestedVersion is a crappy version number
-  if (!requestedVersion && !validateVersion(requestedVersion)) {
+  if (!requested_version && !validateVersion(requested_version)) {
     const availableVersions = await version_getter.getAvailableVersions()
     const versions = JSON.stringify(availableVersions, null, 2)
 
     throw new Error(
-      `Invalid format of "vulkan_version: (${requestedVersion}").
+      `Invalid format of "vulkan_version: (${requested_version}").
        Please specify a version using the format 'major.minor.build.rev'.
        The following versions are available: ${versions}.`
     )
   }
 
-  if (requestedVersion === '') {
-    requestedVersion = 'latest'
+  if (requested_version === '') {
+    requested_version = 'latest'
   }
 
-  return requestedVersion
+  return requested_version
 }
-
+/**
+ * Validates a version number to conform with "1.2.3.4".
+ *
+ * @export
+ * @param {string} version
+ * @return {*}  {boolean}
+ */
 export function validateVersion(version: string): boolean {
   if (version === 'latest') return true
   const re = /^\d+\.\d+\.\d+\.\d+$/
   return re.test(version)
 }
 
+/**
+ * getInputDestination
+ *
+ * @param {string} destination
+ * @return {*}  {Promise<string>}
+ */
 async function getInputDestination(destination: string): Promise<string> {
   // return default install locations for platform
   if (!destination || destination === '') {
@@ -79,8 +106,16 @@ async function getInputDestination(destination: string): Promise<string> {
   return destination
 }
 
-// https://vulkan.lunarg.com/doc/view/latest/windows/getting_started.html#user-content-installing-optional-components
-// list components on windows: "maintenancetool.exe list" or "installer.exe search"
+/**
+ * getInputOptionalComponents
+ *
+ * https://vulkan.lunarg.com/doc/view/latest/windows/getting_started.html#user-content-installing-optional-components
+ * list components on windows: "maintenancetool.exe list" or "installer.exe search"
+ *
+ * @export
+ * @param {string} optional_components
+ * @return {*}  {string[]}
+ */
 export function getInputOptionalComponents(optional_components: string): string[] {
   if (!optional_components) {
     return []

@@ -1,18 +1,19 @@
 import * as core from '@actions/core'
-import * as fs from 'fs'
-import * as platform from './platform'
 import * as tc from '@actions/tool-cache'
-import * as path from 'path'
 import {execSync} from 'child_process'
+import * as fs from 'fs'
+import * as path from 'path'
+import * as platform from './platform'
 
 /**
  * Install the Vulkan SDK.
  *
- * @param sdk_path - Path to the Vulkan SDK installer executable.
- * @param destination - Installation destination path.
- * @param version - Vulkan SDK version.
- * @param optional_components - Array of optional components to install.
- * @returns Promise<string> - Installation path.
+ * @export
+ * @param {string} sdk_path - Path to the Vulkan SDK installer executable.
+ * @param {string} destination - Installation destination path.
+ * @param {string} version - Vulkan SDK version.
+ * @param {string[]} optional_components - Array of optional components to install.
+ * @return {*}  {Promise<string>} - Installation path.
  */
 export async function install_vulkan_sdk(
   sdk_path: string,
@@ -44,10 +45,11 @@ export async function install_vulkan_sdk(
 /**
  * Install the Vulkan SDK on a Linux system.
  *
- * @param sdk_path - Path to the Vulkan SDK installer executable.
- * @param destination - Installation destination path.
- * @param optional_components - Array of optional components to install.
- * @returns Promise<string> - Installation path.
+ * @export
+ * @param {string} sdk_path - Path to the Vulkan SDK installer executable.
+ * @param {string} destination - Installation destination path.
+ * @param {string[]} optional_components - Array of optional components to install.
+ * @return {*}  {Promise<string>} - Installation path.
  */
 export async function install_vulkan_sdk_linux(
   sdk_path: string,
@@ -62,10 +64,11 @@ export async function install_vulkan_sdk_linux(
 /**
  * Install the Vulkan SDK on a MAC system.
  *
- * @param sdk_path - Path to the Vulkan SDK installer executable.
- * @param destination - Installation destination path.
- * @param optional_components - Array of optional components to install.
- * @returns Promise<string> - Installation path.
+ * @export
+ * @param {string} sdk_path - Path to the Vulkan SDK installer executable.
+ * @param {string} destination - Installation destination path.
+ * @param {string[]} optional_components - Array of optional components to install.
+ * @return {*}  {Promise<string>} - Installation path.
  */
 export async function install_vulkan_sdk_mac(
   sdk_path: string,
@@ -87,10 +90,11 @@ export async function install_vulkan_sdk_mac(
 /**
  * Install the Vulkan SDK on a Windows system.
  *
- * @param sdk_path - Path to the Vulkan SDK installer executable.
- * @param destination - Installation destination path.
- * @param optional_components - Array of optional components to install.
- * @returns Promise<string> - Installation path.
+ * @export
+ * @param {string} sdk_path- Path to the Vulkan SDK installer executable.
+ * @param {string} destination - Installation destination path.
+ * @param {string[]} optional_components - Array of optional components to install.
+ * @return {*}  {Promise<string>} - Installation path.
  */
 export async function install_vulkan_sdk_windows(
   sdk_path: string,
@@ -139,12 +143,22 @@ export async function install_vulkan_sdk_windows(
   return destination
 }
 
-// Problem: extracting the zip would create a top-level folder,
-// e.g.  "C:\VulkanSDK\runtime\VulkanRT-1.3.250.1-Components\".
-// So, let's extract the contents of the ZIP archive to a temporary directory,
-// and then move the contents of the top-level folder within the temp dir
-// to the runtime_destination without moving the top-level folder itself.
-// Goal is to have: C:\VulkanSDK\runtime\x64\vulkan-1.dll
+/**
+ * install_vulkan_runtime
+ *
+ * Problem: extracting the zip would create a top-level folder,
+ * e.g.  "C:\VulkanSDK\runtime\VulkanRT-1.3.250.1-Components\".
+ * So, let's extract the contents of the ZIP archive to a temporary directory,
+ * and then copy the contents of the top-level folder within the temp dir
+ * to the runtime_destination without the top-level folder itself.
+ * Goal is to have: C:\VulkanSDK\runtime\x64\vulkan-1.dll
+ *
+ * @export
+ * @param {string} runtime_path
+ * @param {string} destination
+ * @param {string} version
+ * @return {*}  {Promise<string>}
+ */
 export async function install_vulkan_runtime(
   runtime_path: string,
   destination: string,
@@ -157,22 +171,9 @@ export async function install_vulkan_runtime(
   await extract_archive(runtime_path, temp_install_path)
   const top_level_folder = fs.readdirSync(temp_install_path)[0] // VulkanRT-1.3.250.1-Components
   const temp_top_level_folder_path = path.join(temp_install_path, top_level_folder) // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime\VulkanRT-1.3.250.1-Components
-  copyFolderSync(temp_top_level_folder_path, install_path)
+  copy_folder(temp_top_level_folder_path, install_path)
   fs.rmSync(temp_install_path, {recursive: true})
   return install_path
-}
-
-function copyFolderSync(from: string, to: string) {
-  if (!fs.existsSync(to)) {
-    fs.mkdirSync(to)
-  }
-  fs.readdirSync(from).forEach(element => {
-    if (fs.lstatSync(path.join(from, element)).isFile()) {
-      fs.copyFileSync(path.join(from, element), path.join(to, element))
-    } else {
-      copyFolderSync(path.join(from, element), path.join(to, element))
-    }
-  })
 }
 
 /**
@@ -180,7 +181,7 @@ function copyFolderSync(from: string, to: string) {
  *
  * @param {string} file - The path to the archive file to be extracted.
  * @param {string} destination - The destination directory where the archive contents will be extracted.
- * @returns {Promise<string>} A Promise that resolves to the destination directory path after extraction.
+ * @return {*}  {Promise<string>} A Promise that resolves to the destination directory path after extraction.
  */
 async function extract_archive(file: string, destination: string): Promise<string> {
   let extract = tc.extractTar // default extract method on linux: tar
@@ -201,28 +202,77 @@ async function extract_archive(file: string, destination: string): Promise<strin
   return await extract(file, destination)
 }
 
-export function verify_installation_of_sdk(sdk_path?: string): boolean {
+/**
+ * verify_installation_of_sdk
+ *
+ * @export
+ * @param {string} sdk_install_path - The installation path of the Vulkan SDK, e.g. "C:\VulkanSDK\1.3.250.1".
+ * @return {*}  {boolean}
+ */
+export function verify_installation_of_sdk(sdk_install_path: string): boolean {
   let r = false
-  let file = `${sdk_path}/bin/vulkaninfo`
+  let file = `${sdk_install_path}/bin/vulkaninfo`
   if (platform.IS_LINUX || platform.IS_MAC) {
-    file = `${sdk_path}/x86_64/bin/vulkaninfo`
+    file = `${sdk_install_path}/x86_64/bin/vulkaninfo`
   }
   if (platform.IS_WINDOWS) {
-    file = path.normalize(`${sdk_path}/bin/vulkaninfoSDK.exe`)
+    file = path.normalize(`${sdk_install_path}/bin/vulkaninfoSDK.exe`)
   }
   r = fs.existsSync(file)
   return r
 }
 
-export function verify_installation_of_runtime(sdk_path?: string): boolean {
+/**
+ * verify_installation_of_runtime
+ *
+ * @export
+ * @param {string} sdk_install_path - The installation path of the Vulkan SDK, e.g. "C:\VulkanSDK\1.3.250.1".
+ * @return {*}  {boolean}
+ */
+export function verify_installation_of_runtime(sdk_install_path: string): boolean {
   let r = false
   if (platform.IS_WINDOWS) {
-    const file = `${sdk_path}/runtime/vulkan-1.dll`
+    const file = `${sdk_install_path}/runtime/x64/vulkan-1.dll`
     r = fs.existsSync(file)
   }
   return r
 }
 
+/**
+ * stripdown_installation_of_sdk
+ *
+ * @export
+ * @param {string} sdk_install_path - The installation path of the Vulkan SDK, e.g. "C:\VulkanSDK\1.3.250.1".
+ */
+export function stripdown_installation_of_sdk(sdk_install_path: string): void {
+  core.info(`✂ Reducing Vulkan SDK size before caching`)
+  if (platform.IS_WINDOWS) {
+    let folders_to_delete: string[] = []
+    folders_to_delete = [
+      `${sdk_install_path}\\Demos`,
+      `${sdk_install_path}\\Helpers`,
+      `${sdk_install_path}\\installerResources`,
+      `${sdk_install_path}\\Licenses`,
+      `${sdk_install_path}\\Templates`
+      // old installers had
+      //`${sdk_install_path}\\Bin32`,
+      //`${sdk_install_path}\\Tools32`,
+      //`${sdk_install_path}\\Lib32`,
+    ]
+    remove_folders_if_exist(folders_to_delete)
+
+    // this deletes the files in the top-level folder
+    // e.g. maintenancetool.exe, installer.dat, network.xml
+    // which saves around ~25MB
+    delete_files_in_folder(sdk_install_path)
+  }
+}
+/**
+ * Remove one folder, if existing.
+ *
+ * @param {string} folder - The folder to remove.
+ * @return {*}  {boolean}
+ */
 function remove_folder_if_exists(folder: string): boolean {
   try {
     if (fs.existsSync(folder)) {
@@ -238,14 +288,18 @@ function remove_folder_if_exists(folder: string): boolean {
 
   return false
 }
-
+/**
+ * Remove multiple folders, if existing.
+ *
+ * @param {string[]} folders - The folders to remove.
+ */
 function remove_folders_if_exist(folders: string[]): void {
   folders.forEach(folder => {
     remove_folder_if_exists(folder)
   })
 }
 
-function deleteFilesInDirectory(folder: string): void {
+function delete_files_in_folder(folder: string): void {
   fs.readdirSync(folder).forEach(file => {
     const filePath = path.join(folder, file)
     if (fs.statSync(filePath).isDirectory()) {
@@ -258,27 +312,21 @@ function deleteFilesInDirectory(folder: string): void {
     }
   })
 }
-
-export function stripdown_installation_of_sdk(sdk_path: string): void {
-  core.info(`✂ Reducing Vulkan SDK size before caching`)
-  if (platform.IS_WINDOWS) {
-    let folders_to_delete: string[] = []
-    folders_to_delete = [
-      `${sdk_path}\\Demos`,
-      `${sdk_path}\\Helpers`,
-      `${sdk_path}\\installerResources`,
-      `${sdk_path}\\Licenses`,
-      `${sdk_path}\\Templates`
-      // old installers had
-      //`${sdk_path}\\Bin32`,
-      //`${sdk_path}\\Tools32`,
-      //`${sdk_path}\\Lib32`,
-    ]
-    remove_folders_if_exist(folders_to_delete)
-
-    // this deletes the files in the top-level folder
-    // e.g. maintenancetool.exe, installer.dat, network.xml
-    // which saves around ~25MB
-    deleteFilesInDirectory(sdk_path)
+/**
+ * Copy a folder.
+ *
+ * @param {string} from
+ * @param {string} to
+ */
+function copy_folder(from: string, to: string) {
+  if (!fs.existsSync(to)) {
+    fs.mkdirSync(to)
   }
+  fs.readdirSync(from).forEach(element => {
+    if (fs.lstatSync(path.join(from, element)).isFile()) {
+      fs.copyFileSync(path.join(from, element), path.join(to, element))
+    } else {
+      copy_folder(path.join(from, element), path.join(to, element))
+    }
+  })
 }

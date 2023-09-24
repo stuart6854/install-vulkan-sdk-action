@@ -11,7 +11,12 @@ export const IS_MAC: boolean = OS_PLATFORM === 'darwin'
 
 export const TEMP_DIR: string = os.tmpdir()
 
-// this needs to return a platform name, which can be used as part of the URLs
+/**
+ * Return a platform name, which can be used as part of the URLs.
+ *
+ * @export
+ * @return {*}  {string}
+ */
 export function getPlatform(): string {
   if (IS_WINDOWS) {
     // win32 => windows

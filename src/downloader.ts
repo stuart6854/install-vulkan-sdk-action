@@ -4,8 +4,13 @@ import * as path from 'path'
 import * as platform from './platform'
 import * as tc from '@actions/tool-cache' // https://github.com/actions/toolkit/tree/main/packages/tool-cache
 
-// Returns the download url
-// The url is already checked, if available (HTTP 200).
+/**
+ * Get download url for Vulkan SDK.
+ *
+ * @export
+ * @param {string} version - The SDK version to download.
+ * @return {*}  {Promise<string>} Returns the download url.
+ */
 export async function get_url_vulkan_sdk(version: string): Promise<string> {
   const platformName = platform.getPlatform()
 
@@ -34,7 +39,13 @@ export async function get_url_vulkan_sdk(version: string): Promise<string> {
   return VULKAN_SDK_URL
 }
 
-// vulkan-runtime-components is a windows specific download shipping "vulkan-1.dll" for x86 and x64.
+/**
+ * Get download url for Vulkan Runtime.
+ *
+ * @export
+ * @param {string} version - The runtime version to download.
+ * @return {*}  {Promise<string>} Returns the download url.
+ */
 export async function get_url_vulkan_runtime(version: string): Promise<string> {
   // Windows:
   // Latest Version:  https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-runtime-components.zip
@@ -43,7 +54,14 @@ export async function get_url_vulkan_runtime(version: string): Promise<string> {
   is_downloadable('VULKAN_RUNTIME', version, VULKAN_RUNTIME_URL)
   return VULKAN_RUNTIME_URL
 }
-
+/**
+ * is_downloadable checks, if an URL returns HTTP Status Code 200.
+ * lets the action fail otherwise.
+ *
+ * @param {string} name - The nice name.
+ * @param {string} version - The version of the download.
+ * @param {string} url - The URL.
+ */
 async function is_downloadable(name: string, version: string, url: string) {
   try {
     const HttpClientResponse = await http.client.head(url)
@@ -58,7 +76,13 @@ async function is_downloadable(name: string, version: string, url: string) {
     }
   }
 }
-
+/**
+ * Download Vulkan SDK.
+ *
+ * @export
+ * @param {string} version
+ * @return {*}  {Promise<string>}
+ */
 export async function download_vulkan_sdk(version: string): Promise<string> {
   core.info(`🔽 Downloading Vulkan SDK ${version}`)
   const url = await get_url_vulkan_sdk(version)
@@ -69,7 +93,13 @@ export async function download_vulkan_sdk(version: string): Promise<string> {
   return sdk_path
 }
 
-// windows only
+/**
+ * Download Vulkan Runtime (Windows only).
+ *
+ * @export
+ * @param {string} version
+ * @return {*}  {Promise<string>}
+ */
 export async function download_vulkan_runtime(version: string): Promise<string> {
   core.info(`🔽 Downloading Vulkan Runtime ${version}`)
   const url = await get_url_vulkan_runtime(version)
@@ -79,7 +109,12 @@ export async function download_vulkan_runtime(version: string): Promise<string> 
   core.info(`    File: ${runtime_path}`)
   return runtime_path
 }
-
+/**
+ * Returns the platform-based name for the Vulkan SDK archive or installer.
+ *
+ * @export
+ * @return {*}  {string}
+ */
 export function get_vulkan_sdk_filename(): string {
   if (platform.IS_WINDOWS) {
     return `VulkanSDK-Installer.exe`
