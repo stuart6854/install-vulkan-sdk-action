@@ -7,9 +7,9 @@
 A Github Action to install the Vulkan SDK and it's runtime.
 
 - This action can be used to install the Vulkan SDK in your Github Action workflows.
-- The SDK version number is automatically fetched via the Web API, if not set to a fixed version number manually.
+- The SDK version number is automatically fetched via the Web API, if not set to a fixed version number manually (latest).
 - The installation of optional SDK components is supported.
-- Reducing the size of the installed SDK to have a smaller cache package size (only on Windows).
+- The size of the installed SDK is reduced to achieve a smaller cache package size (only on Windows).
 - The installation on MacOS is on our [todo list](https://github.com/jakoch/install-vulkan-sdk-action/issues/293).
 
 ---
@@ -55,6 +55,10 @@ jobs:
           # You can set the Vulkan SDK version to download.
           # Defaults to latest version, if version not set.
           vulkan_version: 1.3.231.1
+          optional_components: com.lunarg.vulkan.vma
+          install_runtime: true
+          cache: true
+          stripdown: true
 
 ```
 
