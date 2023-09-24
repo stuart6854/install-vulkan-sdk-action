@@ -245,11 +245,24 @@ function remove_folders_if_exist(folders: string[]): void {
   })
 }
 
-export function stripdown_installation_of_sdk(sdk_path?: string): void {
+function deleteFilesInDirectory(folder: string): void {
+  fs.readdirSync(folder).forEach(file => {
+    const filePath = path.join(folder, file)
+    if (fs.statSync(filePath).isDirectory()) {
+      // If subdirectory, skip it
+      return
+    } else {
+      // If file, delete it
+      fs.unlinkSync(filePath)
+      core.info(`Deleted file: ${filePath}`)
+    }
+  })
+}
+
+export function stripdown_installation_of_sdk(sdk_path: string): void {
   core.info(`✂ Reducing Vulkan SDK size before caching`)
   if (platform.IS_WINDOWS) {
     let folders_to_delete: string[] = []
-
     folders_to_delete = [
       `${sdk_path}\\Demos`,
       `${sdk_path}\\Helpers`,
@@ -261,7 +274,11 @@ export function stripdown_installation_of_sdk(sdk_path?: string): void {
       //`${sdk_path}\\Tools32`,
       //`${sdk_path}\\Lib32`,
     ]
-
     remove_folders_if_exist(folders_to_delete)
+
+    // this deletes the files in the top-level folder
+    // e.g. maintenancetool.exe, installer.dat, network.xml
+    // which saves around ~25MB
+    deleteFilesInDirectory(sdk_path)
   }
 }
