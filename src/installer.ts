@@ -166,12 +166,14 @@ export async function install_vulkan_runtime(
    Goal is to have: C:\VulkanSDK\runtime\x64\vulkan-1.dll
   */
   core.info(`📦 Extracting Vulkan Runtime (➔ vulkan-1.dll) ...`)
-  const versionized_destination_path = path.normalize(`${destination}/${version}`) // C:\VulkanSDK\1.3.250.1
-  const install_path = path.normalize(`${versionized_destination_path}/runtime`) // C:\VulkanSDK\1.3.250.1\runtime
+  // install into temp
   const temp_install_path = path.normalize(`${platform.TEMP_DIR}/vulkan-runtime`) // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime
   await extract_archive(runtime_path, temp_install_path)
+  // copy from temp to destination
   const top_level_folder = fs.readdirSync(temp_install_path)[0] // VulkanRT-1.3.250.1-Components
   const temp_top_level_folder_path = path.join(temp_install_path, top_level_folder) // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime\VulkanRT-1.3.250.1-Components
+  const versionized_destination_path = path.normalize(`${destination}/${version}`) // C:\VulkanSDK\1.3.250.1
+  const install_path = path.normalize(`${versionized_destination_path}/runtime`) // C:\VulkanSDK\1.3.250.1\runtime
   copy_folder(temp_top_level_folder_path, install_path)
   fs.rmSync(temp_install_path, {recursive: true})
   return install_path
@@ -321,7 +323,7 @@ function delete_files_in_folder(folder: string): void {
  */
 function copy_folder(from: string, to: string) {
   if (!fs.existsSync(to)) {
-    fs.mkdirSync(to)
+    fs.mkdirSync(to, {recursive: true})
   }
   fs.readdirSync(from).forEach(element => {
     if (fs.lstatSync(path.join(from, element)).isFile()) {
