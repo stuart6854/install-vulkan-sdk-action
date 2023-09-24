@@ -156,9 +156,12 @@ export async function install_vulkan_runtime(runtime_path: string, destination: 
   core.info(`📦 Extracting Vulkan Runtime (➔ vulkan-1.dll) ...`)
   const install_path = path.normalize(`${destination}/runtime`) // install_path = C:/VulkanSDK/runtime
   const temp_install_path = await extract_archive(runtime_path, platform.TEMP_DIR)
+  core.info(temp_install_path)
   try {
     const top_level_folder = fs.readdirSync(temp_install_path)[0]
+    core.info(top_level_folder)
     const source_path = path.join(temp_install_path, top_level_folder)
+    core.info(source_path)
     // list all items within the top-level folder
     const items = fs.readdirSync(source_path)
     // move files and directories
@@ -168,7 +171,7 @@ export async function install_vulkan_runtime(runtime_path: string, destination: 
       fs.renameSync(item_source_path, item_destination_path)
     }
     // remove the now empty temporary directory
-    fs.rmdirSync(temp_install_path, {recursive: true})
+    fs.rmSync(temp_install_path, {recursive: true})
   } catch (error) {
     console.error(`Error during installation: ${error}`)
   }
