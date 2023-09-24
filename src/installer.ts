@@ -146,10 +146,32 @@ export async function install_vulkan_sdk_windows(
   return install_path
 }
 
+// Problem: extracting the zip would create a top-level folder,
+// e.g.  "C:\VulkanSDK\runtime\VulkanRT-1.3.250.1-Components\".
+// So, let's extract the contents of the ZIP archive to a temporary directory,
+// and then move the contents of the top-level folder within the temp dir
+// to the runtime_destination without moving the top-level folder itself.
+// Goal is to have: C:\VulkanSDK\runtime\x64\vulkan-1.dll
 export async function install_vulkan_runtime(runtime_path: string, destination: string): Promise<string> {
   core.info(`📦 Extracting Vulkan Runtime (➔ vulkan-1.dll) ...`)
-  const runtime_destination = path.normalize(`${destination}/runtime`)
-  const install_path = extract_archive(runtime_path, runtime_destination)
+  const install_path = path.normalize(`${destination}/runtime`) // install_path = C:/VulkanSDK/runtime
+  const temp_install_path = await extract_archive(runtime_path, platform.TEMP_DIR)
+  try {
+    const top_level_folder = fs.readdirSync(temp_install_path)[0]
+    const source_path = path.join(temp_install_path, top_level_folder)
+    // list all items within the top-level folder
+    const items = fs.readdirSync(source_path)
+    // move files and directories
+    for (const item of items) {
+      const item_source_path = path.join(source_path, item)
+      const item_destination_path = path.join(install_path, item)
+      fs.renameSync(item_source_path, item_destination_path)
+    }
+    // remove the now empty temporary directory
+    fs.rmdirSync(temp_install_path, {recursive: true})
+  } catch (error) {
+    console.error(`Error during installation: ${error}`)
+  }
   return install_path
 }
 
