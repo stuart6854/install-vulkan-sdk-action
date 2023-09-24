@@ -155,30 +155,27 @@ export async function install_vulkan_sdk_windows(
 // Goal is to have: C:\VulkanSDK\runtime\x64\vulkan-1.dll
 export async function install_vulkan_runtime(runtime_path: string, destination: string): Promise<string> {
   core.info(`📦 Extracting Vulkan Runtime (➔ vulkan-1.dll) ...`)
-  // C:/VulkanSDK/runtime
-  const install_path = path.normalize(`${destination}/runtime`)
-  // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime
-  const temp_install_path = path.normalize(`${platform.TEMP_DIR}/vulkan-runtime`)
+  const install_path = path.normalize(`${destination}/runtime`) // C:/VulkanSDK/runtime
+  const temp_install_path = path.normalize(`${platform.TEMP_DIR}/vulkan-runtime`) // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime
   await extract_archive(runtime_path, temp_install_path)
-  try {
-    // VulkanRT-1.3.250.1-Components
-    const top_level_folder = fs.readdirSync(temp_install_path)[0]
-    // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime\VulkanRT-1.3.250.1-Components
-    const source_path = path.join(temp_install_path, top_level_folder)
-    // list all items within the top-level folder
-    const items = fs.readdirSync(source_path)
-    // move files and directories
-    for (const item of items) {
-      let item_source_path = path.join(source_path, item)
-      let item_destination_path = path.join(install_path, item)
-      fs.copyFileSync(item_source_path, item_destination_path)
-    }
-    // remove the now empty temporary directory
-    fs.rmSync(temp_install_path, {recursive: true})
-  } catch (error) {
-    console.error(`Error during installation: ${error}`)
-  }
+  const top_level_folder = fs.readdirSync(temp_install_path)[0] // VulkanRT-1.3.250.1-Components
+  const temp_top_level_folder_path = path.join(temp_install_path, top_level_folder) // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime\VulkanRT-1.3.250.1-Components
+  copyFolderSync(temp_top_level_folder_path, install_path)
+  fs.rmSync(temp_install_path, {recursive: true})
   return install_path
+}
+
+function copyFolderSync(from: string, to: string) {
+  if (!fs.existsSync(to)) {
+    fs.mkdirSync(to)
+  }
+  fs.readdirSync(from).forEach(element => {
+    if (fs.lstatSync(path.join(from, element)).isFile()) {
+      fs.copyFileSync(path.join(from, element), path.join(to, element))
+    } else {
+      copyFolderSync(path.join(from, element), path.join(to, element))
+    }
+  })
 }
 
 /**
