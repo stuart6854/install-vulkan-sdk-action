@@ -154,9 +154,12 @@ export async function install_vulkan_sdk_windows(
 // Goal is to have: C:\VulkanSDK\runtime\x64\vulkan-1.dll
 export async function install_vulkan_runtime(runtime_path: string, destination: string): Promise<string> {
   core.info(`📦 Extracting Vulkan Runtime (➔ vulkan-1.dll) ...`)
-  const install_path = path.normalize(`${destination}/runtime`) // install_path = C:/VulkanSDK/runtime
-  const temp_install_path = await extract_archive(runtime_path, platform.TEMP_DIR)
+  // install_path = C:/VulkanSDK/runtime
+  const install_path = path.normalize(`${destination}/runtime`)
+  // temp_install_path = C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime
+  const temp_install_path = path.normalize(`${platform.TEMP_DIR}/vulkan-runtime`)
   core.info(temp_install_path)
+  await extract_archive(runtime_path, temp_install_path)
   try {
     const top_level_folder = fs.readdirSync(temp_install_path)[0]
     core.info(top_level_folder)
@@ -166,8 +169,8 @@ export async function install_vulkan_runtime(runtime_path: string, destination: 
     const items = fs.readdirSync(source_path)
     // move files and directories
     for (const item of items) {
-      const item_source_path = path.join(source_path, item)
-      const item_destination_path = path.join(install_path, item)
+      let item_source_path = path.join(source_path, item)
+      let item_destination_path = path.join(install_path, item)
       fs.renameSync(item_source_path, item_destination_path)
     }
     // remove the now empty temporary directory
