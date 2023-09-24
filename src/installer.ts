@@ -146,13 +146,6 @@ export async function install_vulkan_sdk_windows(
 /**
  * install_vulkan_runtime
  *
- * Problem: extracting the zip would create a top-level folder,
- * e.g.  "C:\VulkanSDK\runtime\VulkanRT-1.3.250.1-Components\".
- * So, let's extract the contents of the ZIP archive to a temporary directory,
- * and then copy the contents of the top-level folder within the temp dir
- * to the runtime_destination without the top-level folder itself.
- * Goal is to have: C:\VulkanSDK\runtime\x64\vulkan-1.dll
- *
  * @export
  * @param {string} runtime_path
  * @param {string} destination
@@ -164,6 +157,14 @@ export async function install_vulkan_runtime(
   destination: string,
   version: string
 ): Promise<string> {
+  /*
+   Problem: extracting the zip would create a top-level folder,
+   e.g.  "C:\VulkanSDK\runtime\VulkanRT-1.3.250.1-Components\".
+   So, let's extract the contents of the ZIP archive to a temporary directory,
+   and then copy the contents of the top-level folder within the temp dir
+   to the runtime_destination without the top-level folder itself.
+   Goal is to have: C:\VulkanSDK\runtime\x64\vulkan-1.dll
+  */
   core.info(`📦 Extracting Vulkan Runtime (➔ vulkan-1.dll) ...`)
   const versionized_destination_path = path.normalize(`${destination}/${version}`) // C:\VulkanSDK\1.3.250.1
   const install_path = path.normalize(`${versionized_destination_path}/runtime`) // C:\VulkanSDK\1.3.250.1\runtime

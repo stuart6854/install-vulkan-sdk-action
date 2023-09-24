@@ -44,17 +44,19 @@ async function get_vulkan_sdk(
     }
   }
 
-  // download + install RT and SDK
-  // if use_cache = false (cache is not used)
-  // if use_cache = true && cacheKey = false (cache is used, but not found)
+  /*
+    Download and install RT and SDK with the following conditions:
+     - if (use_cache = false)                    means cache is not used
+     - if (use_cache = true && cacheHit = false) means cache is used, but not found
+  */
 
-  // download + install runtime
-  // also get the runtime, before the SDK, this allows caching both
+  // download + install runtime before the SDK, this allows caching both.
   if (install_runtime && platform.IS_WINDOWS) {
     const vulkan_runtime_path = await downloader.download_vulkan_runtime(version)
-    install_path = await installer.install_vulkan_runtime(vulkan_runtime_path, destination, version)
+    await installer.install_vulkan_runtime(vulkan_runtime_path, destination, version)
   }
 
+  // download + install SDK
   const vulkan_sdk_path = await downloader.download_vulkan_sdk(version)
   install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, version, optional_components)
 

@@ -80,8 +80,8 @@ async function is_downloadable(name: string, version: string, url: string) {
  * Download Vulkan SDK.
  *
  * @export
- * @param {string} version
- * @return {*}  {Promise<string>}
+ * @param {string} version - The version to download.
+ * @return {*}  {Promise<string>} Download location.
  */
 export async function download_vulkan_sdk(version: string): Promise<string> {
   core.info(`🔽 Downloading Vulkan SDK ${version}`)
@@ -97,8 +97,8 @@ export async function download_vulkan_sdk(version: string): Promise<string> {
  * Download Vulkan Runtime (Windows only).
  *
  * @export
- * @param {string} version
- * @return {*}  {Promise<string>}
+ * @param {string} version - The version to download.
+ * @return {*}  {Promise<string>} Download location.
  */
 export async function download_vulkan_runtime(version: string): Promise<string> {
   core.info(`🔽 Downloading Vulkan Runtime ${version}`)
@@ -113,7 +113,7 @@ export async function download_vulkan_runtime(version: string): Promise<string> 
  * Returns the platform-based name for the Vulkan SDK archive or installer.
  *
  * @export
- * @return {*}  {string}
+ * @return {*}  {string} Platform-based name for the Vulkan SDK archive or installer.
  */
 export function get_vulkan_sdk_filename(): string {
   if (platform.IS_WINDOWS) {
