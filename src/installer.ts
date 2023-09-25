@@ -23,16 +23,16 @@ export async function install_vulkan_sdk(
 ): Promise<string> {
   let install_path = ''
 
-  // Changing the destination to a versionzed folder "C:\VulkanSDK\1.3.250.1"
-  const versionized_destination_path = path.normalize(`${destination}/${version}`)
-
   core.info(`📦 Extracting Vulkan SDK...`)
 
   if (platform.IS_MAC) {
-    install_path = await install_vulkan_sdk_mac(sdk_path, versionized_destination_path, optional_components)
+    install_path = await install_vulkan_sdk_mac(sdk_path, destination, optional_components)
   } else if (platform.IS_LINUX) {
-    install_path = await install_vulkan_sdk_linux(sdk_path, versionized_destination_path, optional_components)
+    // the archive extracts a "1.3.250.1" top-level dir
+    install_path = await install_vulkan_sdk_linux(sdk_path, destination, optional_components)
   } else if (platform.IS_WINDOWS) {
+    // changing the destination to a versionzed folder "C:\VulkanSDK\1.3.250.1"
+    const versionized_destination_path = path.normalize(`${destination}/${version}`)
     install_path = await install_vulkan_sdk_windows(sdk_path, versionized_destination_path, optional_components)
   }
 

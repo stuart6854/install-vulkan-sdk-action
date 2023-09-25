@@ -94,10 +94,6 @@ async function run(): Promise<void> {
 
     const version = await version_getter.resolve_version(inputs.version)
 
-    // get the runtime, before the SDK, this allows caching both
-    if (inputs.install_runtime && platform.IS_WINDOWS) {
-    }
-
     const sdk_path = await get_vulkan_sdk(
       version,
       inputs.destination,
@@ -149,10 +145,12 @@ async function run(): Promise<void> {
       core.warning(`Could not find Vulkan SDK in ${install_path}`)
     }
 
-    if (platform.IS_WINDOWS && installer.verify_installation_of_runtime(install_path)) {
-      core.info(`✔️ [INFO] Path to Vulkan Runtime: ${install_path}\runtime`)
-    } else {
-      core.warning(`Could not find Vulkan Runtime in ${install_path}\runtime`)
+    if (platform.IS_WINDOWS) {
+      if (installer.verify_installation_of_runtime(install_path)) {
+        core.info(`✔️ [INFO] Path to Vulkan Runtime: ${install_path}\runtime`)
+      } else {
+        core.warning(`Could not find Vulkan Runtime in ${install_path}\runtime`)
+      }
     }
 
     core.info(`✔️ [DONE] Vulkan SDK installed.`)
