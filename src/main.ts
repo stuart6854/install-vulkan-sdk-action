@@ -147,10 +147,11 @@ async function run(): Promise<void> {
     }
 
     if (platform.IS_WINDOWS) {
+      let runtime_path = `${install_path}\\runtime`
       if (installer.verify_installation_of_runtime(install_path)) {
-        core.info(`✔️ [INFO] Path to Vulkan Runtime: ${install_path}\runtime`)
+        core.info(`✔️ [INFO] Path to Vulkan Runtime: ${runtime_path}`)
       } else {
-        core.warning(`Could not find Vulkan Runtime in ${install_path}\runtime`)
+        core.warning(`Could not find Vulkan Runtime in ${runtime_path}`)
       }
     }
   } catch (error: any) {
