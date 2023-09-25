@@ -86,7 +86,12 @@ async function get_vulkan_sdk(
   // restore from cache
   if (use_cache) {
     let cacheHit = undefined
-    cacheHit = await cache.restoreCache([destination], cachePrimaryKey, cacheRestoreKeys)
+    if (platform.IS_WINDOWS) {
+      const versionized_destination_path = path.normalize(`${destination}/${version}`)
+      cacheHit = await cache.restoreCache([versionized_destination_path], cachePrimaryKey, cacheRestoreKeys)
+    } else {
+      cacheHit = await cache.restoreCache([destination], cachePrimaryKey, cacheRestoreKeys)
+    }
     if (cacheHit === undefined) {
       core.info(`🎯 [Cache] Cache for 'Vulkan SDK' not found.`)
     } else {
