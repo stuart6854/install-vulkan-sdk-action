@@ -1,11 +1,64 @@
 import * as cache from '@actions/cache'
 import * as core from '@actions/core'
+import * as crypto from 'crypto'
+import * as fs from 'fs'
 import * as path from 'path'
+import * as stream from 'stream'
+import * as util from 'util'
 import * as downloader from './downloader'
 import * as input from './inputs'
 import * as installer from './installer'
 import * as platform from './platform'
 import * as version_getter from './versiongetter'
+
+/**
+ * Get a hash for a folder with files.
+ *
+ * @param {string} folder - The folder to create a hash for.
+ * @return {*}  {Promise<string>} - Returns the hash hexcode as string.
+ */
+async function hashFiles(folder: string): Promise<string> {
+  const result = crypto.createHash('sha256')
+  const files = await fs.readdirSync(folder)
+  for (const file of files) {
+    try {
+      const hash = crypto.createHash('sha256')
+      const pipeline = util.promisify(stream.pipeline)
+      const filePath = `${folder}/${file}`
+      await pipeline(fs.createReadStream(filePath), hash)
+      result.write(hash.digest())
+    } catch (err) {
+      // Skip files that don't exist.
+      if ((err as any)?.code !== 'ENOENT') {
+        throw err
+      }
+    }
+  }
+  result.end()
+  return result.digest('hex')
+}
+
+/**
+ * Get Cache Keys
+ *
+ * Format will be "cache-OS-ARCH-vulkan-sdk-VERSION-HASH".
+ * E.g. "cache-linux-x64-vulkan-sdk-1.3.250.1-hash".
+ *
+ * @param {string} version - The Vulkan SDK version.
+ * @param {string} path - The Vulkan SDK installation path.
+ * @return {*}  {Promise<{ cachePrimaryKey: string; cacheRestoreKeys: string[]; }>}
+ */
+async function getCacheKeys(
+  version: string,
+  path: string
+): Promise<{cachePrimaryKey: string; cacheRestoreKeys: string[]}> {
+  const hash = (await hashFiles(path)).slice(0, 12)
+  // Note: getPlatform() is used to get "windows", instead of OS_PLATFORM value "win32"
+  const cachePrimaryKey = `cache-${platform.getPlatform()}-${platform.OS_ARCH}-vulkan-sdk-${version}` // -${hash}
+  const cacheRestoreKey1 = `cache-${platform.getPlatform()}-${platform.OS_ARCH}-vulkan-sdk-`
+  const cacheRestoreKey2 = `cache-${platform.getPlatform()}-${platform.OS_ARCH}-`
+  return {cachePrimaryKey, cacheRestoreKeys: [cacheRestoreKey1, cacheRestoreKey2]}
+}
 
 /**
  * Retrieves and installs the Vulkan SDK.
@@ -28,15 +81,12 @@ async function get_vulkan_sdk(
 ): Promise<string> {
   let install_path: string
 
-  // "cache-linux-x64-vulkan-sdk-1.3.250.1"
-  // note: getPlatform() is used to get "windows", instead of OS_PLATFORM value "win32"
-  const cachePrimaryKey = `cache-${platform.getPlatform()}-${platform.OS_ARCH}-vulkan-sdk-${version}`
+  const {cachePrimaryKey, cacheRestoreKeys} = await getCacheKeys(version, destination)
 
-  destination.slice()
   // restore from cache
   if (use_cache) {
     let cacheHit = undefined
-    cacheHit = await cache.restoreCache([destination].slice(), cachePrimaryKey)
+    cacheHit = await cache.restoreCache([destination], cachePrimaryKey, cacheRestoreKeys)
     if (cacheHit === undefined) {
       core.info(`🎯 [Cache] Cache for 'Vulkan SDK' not found.`)
     } else {
