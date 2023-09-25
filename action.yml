@@ -5,8 +5,8 @@
 # SPDX-License-Identifier: BSL-1.0
 #
 
-name: "Install Vulkan SDK"
-description: "Installs the Vulkan SDK"
+name: "Install Vulkan SDK and Runtime"
+description: "Installs the Vulkan SDK and Runtime"
 author: 'jakoch'
 branding:
   color: 'blue'
@@ -16,9 +16,6 @@ inputs:
   vulkan_version:
     description: "The Vulkan SDK version to download. Default: latest version."
     required: false
-  cache:
-    description: "Cache the Vulkan installation folder. Default: false."
-    required: false
   destination:
     description: "The installation folder for the Vulkan SDK. Default: see ReadMe."
     required: false
@@ -27,6 +24,9 @@ inputs:
     required: false
   install_runtime:
     description: "Windows only. Installs the vulkan runtime (vulkan-1.dll). Default: false."
+    required: false
+  cache:
+    description: "Cache the Vulkan installation folder. Default: false."
     required: false
   stripdown:
     description: "Reduces the Vulkan SDK size before caching. Default: false."
