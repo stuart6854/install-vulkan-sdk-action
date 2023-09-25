@@ -52,7 +52,7 @@ async function getCacheKeys(
   version: string,
   path: string
 ): Promise<{cachePrimaryKey: string; cacheRestoreKeys: string[]}> {
-  const hash = (await hashFiles(path)).slice(0, 12)
+  //const hash = (await hashFiles(path)).slice(0, 12)
   // Note: getPlatform() is used to get "windows", instead of OS_PLATFORM value "win32"
   const cachePrimaryKey = `cache-${platform.getPlatform()}-${platform.OS_ARCH}-vulkan-sdk-${version}` // -${hash}
   const cacheRestoreKey1 = `cache-${platform.getPlatform()}-${platform.OS_ARCH}-vulkan-sdk-`
