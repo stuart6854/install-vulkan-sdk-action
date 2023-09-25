@@ -152,8 +152,6 @@ async function run(): Promise<void> {
         core.warning(`Could not find Vulkan Runtime in ${install_path}\runtime`)
       }
     }
-
-    core.info(`✔️ [DONE]`)
   } catch (error: any) {
     errorHandler(error as Error)
   }

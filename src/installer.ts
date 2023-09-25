@@ -282,7 +282,7 @@ function remove_folder_if_exists(folder: string): boolean {
   try {
     if (fs.existsSync(folder)) {
       fs.rmSync(folder, {recursive: true})
-      core.info(`Folder ${folder} removed successfully.`)
+      core.info(`Deleted folder: ${folder}`)
       return true
     } else {
       core.info(`Folder ${folder} doesn't exist.`)
