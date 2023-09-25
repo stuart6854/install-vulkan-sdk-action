@@ -50,15 +50,15 @@ async function get_vulkan_sdk(
      - if (use_cache = true && cacheHit = false) means cache is used, but not found
   */
 
-  // Download and install Runtime before the SDK. This allows caching both.
+  // Download and install SDK
+  const vulkan_sdk_path = await downloader.download_vulkan_sdk(version)
+  install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, version, optional_components)
+
+  // Download and install Runtime after the SDK. This allows caching both.
   if (platform.IS_WINDOWS && install_runtime) {
     const vulkan_runtime_path = await downloader.download_vulkan_runtime(version)
     await installer.install_vulkan_runtime(vulkan_runtime_path, destination, version)
   }
-
-  // Download and install SDK
-  const vulkan_sdk_path = await downloader.download_vulkan_sdk(version)
-  install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, version, optional_components)
 
   // cache install folder
   if (use_cache) {
@@ -153,7 +153,7 @@ async function run(): Promise<void> {
       }
     }
 
-    core.info(`✔️ [DONE] Vulkan SDK installed.`)
+    core.info(`✔️ [DONE]`)
   } catch (error: any) {
     errorHandler(error as Error)
   }

@@ -123,6 +123,8 @@ export async function install_vulkan_sdk_windows(
   //  -Verb RunAs
   //  -Wait
   //
+  // Alternative: "$installer = Start-Process ... -PassThru" and "$installer.WaitForExit();"
+  //
   // Important:
   // 1. The installer must be run as administrator.
   // 2. Keep the "-Wait", because the installer process needs to finish writing all files and folders be we can proceed.
@@ -168,7 +170,7 @@ export async function install_vulkan_runtime(
   // install into temp
   const temp_install_path = path.normalize(`${platform.TEMP_DIR}/vulkan-runtime`) // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime
   await extract_archive(runtime_path, temp_install_path)
-  await wait(3000)
+  await wait(3000) // wait/block for 3sec for files to arrive. ugly hack.
   // copy from temp to destination
   const top_level_folder = fs.readdirSync(temp_install_path)[0] // VulkanRT-1.3.250.1-Components
   const temp_top_level_folder_path = path.join(temp_install_path, top_level_folder) // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime\VulkanRT-1.3.250.1-Components
