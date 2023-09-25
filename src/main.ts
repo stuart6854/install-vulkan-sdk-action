@@ -28,14 +28,15 @@ async function get_vulkan_sdk(
 ): Promise<string> {
   let install_path: string
 
-  // "cache-vulkan-sdk-1.3.250.1-linux-x64"
+  // "cache-linux-x64-vulkan-sdk-1.3.250.1"
   // note: getPlatform() is used to get "windows", instead of OS_PLATFORM value "win32"
-  const cachePrimaryKey = `cache-vulkan-sdk-${version}-${platform.getPlatform()}-${platform.OS_ARCH}`
+  const cachePrimaryKey = `cache-${platform.getPlatform()}-${platform.OS_ARCH}-vulkan-sdk-${version}`
 
+  destination.slice()
   // restore from cache
   if (use_cache) {
     let cacheHit = undefined
-    cacheHit = await cache.restoreCache([destination], cachePrimaryKey)
+    cacheHit = await cache.restoreCache([destination].slice(), cachePrimaryKey)
     if (cacheHit === undefined) {
       core.info(`🎯 [Cache] Cache for 'Vulkan SDK' not found.`)
     } else {
