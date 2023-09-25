@@ -37,7 +37,6 @@ export async function install_vulkan_sdk(
   }
 
   core.info(`   Installed into folder: ${install_path}`)
-  core.addPath(install_path)
 
   return install_path
 }
@@ -169,13 +168,14 @@ export async function install_vulkan_runtime(
   // install into temp
   const temp_install_path = path.normalize(`${platform.TEMP_DIR}/vulkan-runtime`) // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime
   await extract_archive(runtime_path, temp_install_path)
+  await wait(3000)
   // copy from temp to destination
   const top_level_folder = fs.readdirSync(temp_install_path)[0] // VulkanRT-1.3.250.1-Components
   const temp_top_level_folder_path = path.join(temp_install_path, top_level_folder) // C:\Users\RUNNER~1\AppData\Local\Temp\vulkan-runtime\VulkanRT-1.3.250.1-Components
-  const versionized_destination_path = path.normalize(`${destination}/${version}`) // C:\VulkanSDK\1.3.250.1
-  const install_path = path.normalize(`${versionized_destination_path}/runtime`) // C:\VulkanSDK\1.3.250.1\runtime
+  const install_path = path.normalize(`${destination}/${version}/runtime`) // C:\VulkanSDK\1.3.250.1\runtime
   copy_folder(temp_top_level_folder_path, install_path)
   fs.rmSync(temp_install_path, {recursive: true})
+  core.info(`   Installed into folder: ${install_path}`)
   return install_path
 }
 
@@ -242,14 +242,14 @@ export function verify_installation_of_runtime(sdk_install_path: string): boolea
 }
 
 /**
- * stripdown_installation_of_sdk
+ * stripdown_installation_of_sdk (only windows).
  *
  * @export
  * @param {string} sdk_install_path - The installation path of the Vulkan SDK, e.g. "C:\VulkanSDK\1.3.250.1".
  */
 export function stripdown_installation_of_sdk(sdk_install_path: string): void {
-  core.info(`✂ Reducing Vulkan SDK size before caching`)
   if (platform.IS_WINDOWS) {
+    core.info(`✂ Reducing Vulkan SDK size before caching`)
     let folders_to_delete: string[] = []
     folders_to_delete = [
       `${sdk_install_path}\\Demos`,
@@ -331,5 +331,16 @@ function copy_folder(from: string, to: string) {
     } else {
       copy_folder(path.join(from, element), path.join(to, element))
     }
+  })
+}
+/**
+ * Wait a bit...
+ *
+ * @param {number} [timeout=2000]
+ * @return {*}
+ */
+function wait(ms: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
   })
 }

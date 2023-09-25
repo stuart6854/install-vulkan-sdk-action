@@ -50,13 +50,13 @@ async function get_vulkan_sdk(
      - if (use_cache = true && cacheHit = false) means cache is used, but not found
   */
 
-  // download + install runtime before the SDK, this allows caching both.
-  if (install_runtime && platform.IS_WINDOWS) {
+  // Download and install Runtime before the SDK. This allows caching both.
+  if (platform.IS_WINDOWS && install_runtime) {
     const vulkan_runtime_path = await downloader.download_vulkan_runtime(version)
     await installer.install_vulkan_runtime(vulkan_runtime_path, destination, version)
   }
 
-  // download + install SDK
+  // Download and install SDK
   const vulkan_sdk_path = await downloader.download_vulkan_sdk(version)
   install_path = await installer.install_vulkan_sdk(vulkan_sdk_path, destination, version, optional_components)
 
