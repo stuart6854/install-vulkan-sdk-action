@@ -44,12 +44,12 @@ jobs:
       matrix:
         config:
           - { name: "Windows", os: windows-latest }
-          - { name: "Ubuntu", os: ubuntu-latest }
-          - { name: "MacOS", os: macos-latest }
+          - { name: "Ubuntu",  os: ubuntu-latest }
+          #- { name: "MacOS",   os: macos-latest } not supported, yet
 
     steps:
       - name: Install Vulkan SDK
-        uses: jakoch/install-vulkan-sdk-action@main
+        uses: jakoch/install-vulkan-sdk-action@v1.0.0
         with:
           # You can set the Vulkan SDK version to download.
           # Defaults to latest version, if version not set.

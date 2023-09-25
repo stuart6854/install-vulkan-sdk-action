@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as path from 'path'
 import * as platform from './platform'
 import * as version_getter from './versiongetter'
+import {request} from 'http'
 
 /**
  * List of available Input arguments
@@ -38,13 +39,20 @@ export async function getInputs(): Promise<Inputs> {
   }
 }
 /**
- * GetInputVersion accepts a version and validates it or if version is
+ * GetInputVersion accepts a version and validates it.
+ * If "vulkan_version" was not set or is empty, assume "latest" version.
  *
  * @export
  * @param {string} requested_version
  * @return {*}  {Promise<string>}
  */
 export async function getInputVersion(requested_version: string): Promise<string> {
+  // if "vulkan_version" was not set or is empty, assume "latest" version
+  if (requested_version === '') {
+    requested_version = 'latest'
+    return requested_version
+  }
+
   // throw error, if requestedVersion is a crappy version number
   if (!requested_version && !validateVersion(requested_version)) {
     const availableVersions = await version_getter.getAvailableVersions()
@@ -57,10 +65,6 @@ export async function getInputVersion(requested_version: string): Promise<string
     )
   }
 
-  if (requested_version === '') {
-    requested_version = 'latest'
-  }
-
   return requested_version
 }
 /**
@@ -71,7 +75,6 @@ export async function getInputVersion(requested_version: string): Promise<string
  * @return {*}  {boolean}
  */
 export function validateVersion(version: string): boolean {
-  if (version === 'latest') return true
   const re = /^\d+\.\d+\.\d+\.\d+$/
   return re.test(version)
 }
