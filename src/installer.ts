@@ -127,7 +127,7 @@ export async function install_vulkan_sdk_windows(
   //
   // Important:
   // 1. The installer must be run as administrator.
-  // 2. Keep the "-Wait", because the installer process needs to finish writing all files and folders be we can proceed.
+  // 2. Keep the "-Wait", because the installer process needs to finish writing all files and folders before we can proceed.
   const run_as_admin_cmd = `powershell.exe Start-Process -FilePath '${sdk_path}' -Args '${installer_args}' -Verb RunAs -Wait`
 
   core.debug(`Command: ${run_as_admin_cmd}`)
@@ -145,7 +145,7 @@ export async function install_vulkan_sdk_windows(
 }
 
 /**
- * install_vulkan_runtime
+ * Install the Vulkan Runtime
  *
  * @export
  * @param {string} runtime_path
@@ -208,7 +208,7 @@ async function extract_archive(file: string, destination: string): Promise<strin
 }
 
 /**
- * verify_installation_of_sdk
+ * Verify the installation of the SDK.
  *
  * @export
  * @param {string} sdk_install_path - The installation path of the Vulkan SDK, e.g. "C:\VulkanSDK\1.3.250.1".
@@ -228,7 +228,7 @@ export function verify_installation_of_sdk(sdk_install_path: string): boolean {
 }
 
 /**
- * verify_installation_of_runtime
+ * vVerify the installation of the Vulkan Runtime.
  *
  * @export
  * @param {string} sdk_install_path - The installation path of the Vulkan SDK, e.g. "C:\VulkanSDK\1.3.250.1".
@@ -244,7 +244,10 @@ export function verify_installation_of_runtime(sdk_install_path: string): boolea
 }
 
 /**
- * stripdown_installation_of_sdk (only windows).
+ * Stripdown the installation of the Vulkan SDK (only windows).
+ * This reduces the size of the SDK before caching.
+ * It removes superflous files given the CI context this action runs in,
+ * e.g. removing demos and removing the maintainance-tool.exe.
  *
  * @export
  * @param {string} sdk_install_path - The installation path of the Vulkan SDK, e.g. "C:\VulkanSDK\1.3.250.1".

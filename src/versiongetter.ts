@@ -61,7 +61,7 @@ export const getLatestVersions = async (): Promise<LatestVersionResponse | null>
 }
 
 /**
- * resolve_version
+ * Resolve version
  *
  * This function resolves the string literal "latest" to the latest version number.
  * "latest" might be set by the user or during input validation, when the version field is empty.
@@ -94,8 +94,8 @@ export async function resolve_version(version: string): Promise<string> {
 }
 
 /**
- * get latest version for platform.
- * they might have a different latest version! ¯\\_(ツ)_/¯
+ * Get latest version for platform.
+ * They might have a different latest versions! ¯\\_(ツ)_/¯
  *
  * @param {LatestVersionResponse} latestVersion
  * @return {*}  {string}

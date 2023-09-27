@@ -2,7 +2,6 @@ import * as core from '@actions/core'
 import * as path from 'path'
 import * as platform from './platform'
 import * as version_getter from './versiongetter'
-import {request} from 'http'
 
 /**
  * List of available Input arguments
@@ -20,6 +19,9 @@ export interface Inputs {
 }
 /**
  * Handles the incomming arguments for the action.
+ *
+ * If an input argument requires validation beyond a simple boolean check,
+ * individual getter functions are used for incoming argument validation.
  *
  * @export
  * @return {*}  {Promise<Inputs>}
@@ -39,7 +41,7 @@ export async function getInputs(): Promise<Inputs> {
   }
 }
 /**
- * GetInputVersion accepts a version and validates it.
+ * GetInputVersion validates the "version" argument.
  * If "vulkan_version" was not set or is empty, assume "latest" version.
  *
  * @export
@@ -68,7 +70,8 @@ export async function getInputVersion(requested_version: string): Promise<string
   return requested_version
 }
 /**
- * Validates a version number to conform with "1.2.3.4".
+ * Validates a version number to conform with the
+ * "major.minor.patch.revision" ("1.2.3.4") versioning scheme.
  *
  * @export
  * @param {string} version
@@ -80,7 +83,7 @@ export function validateVersion(version: string): boolean {
 }
 
 /**
- * getInputDestination
+ * getInputDestination validates the "destination" argument.
  *
  * @param {string} destination
  * @return {*}  {Promise<string>}
@@ -110,7 +113,7 @@ async function getInputDestination(destination: string): Promise<string> {
 }
 
 /**
- * getInputOptionalComponents
+ * getInputOptionalComponents validates the "optional_components" argument.
  *
  * https://vulkan.lunarg.com/doc/view/latest/windows/getting_started.html#user-content-installing-optional-components
  * list components on windows: "maintenancetool.exe list" or "installer.exe search"

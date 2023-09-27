@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
-import * as http from './http'
-import * as path from 'path'
-import * as platform from './platform'
 import * as tc from '@actions/tool-cache' // https://github.com/actions/toolkit/tree/main/packages/tool-cache
+import * as path from 'path'
+import * as http from './http'
+import * as platform from './platform'
 
 /**
  * Get download url for Vulkan SDK.
@@ -56,7 +56,7 @@ export async function get_url_vulkan_runtime(version: string): Promise<string> {
 }
 /**
  * is_downloadable checks, if an URL returns HTTP Status Code 200.
- * lets the action fail otherwise.
+ * Otherwise, it let's the action fail.
  *
  * @param {string} name - The nice name.
  * @param {string} version - The version of the download.

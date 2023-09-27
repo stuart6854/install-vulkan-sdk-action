@@ -15,7 +15,7 @@ export const TEMP_DIR: string = os.tmpdir()
  * Return a platform name, which can be used as part of the URLs.
  *
  * @export
- * @return {*}  {string}
+ * @return {*}  {string} The plaform name (windows, mac, linux).
  */
 export function getPlatform(): string {
   if (IS_WINDOWS) {

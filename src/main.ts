@@ -112,6 +112,11 @@ function errorHandler(error: Error): void {
   core.setFailed(message)
 }
 
+/**
+ * This is the main function.
+ *
+ * @return {*}  {Promise<void>}
+ */
 async function run(): Promise<void> {
   try {
     const inputs: input.Inputs = await input.getInputs()
@@ -177,6 +182,8 @@ async function run(): Promise<void> {
         core.warning(`Could not find Vulkan Runtime in ${runtime_path}`)
       }
     }
+
+    core.info(`✅ Done.`)
   } catch (error: any) {
     errorHandler(error as Error)
   }
