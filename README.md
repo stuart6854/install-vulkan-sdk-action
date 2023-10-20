@@ -103,3 +103,20 @@ The following environment variables are set:
 All the content in this repository is licensed under the [MIT License](https://github.com/jakoch/install-vulkan-sdk-action/blob/main/LICENSE).
 
 Copyright (c) 2021 Jens A. Koch
+
+## Development Reminder
+
+To make a new release:
+
+- bump version number in package.json
+- run `npm run npm_install` to install the dependencies
+- run `npm run all` to generate a bundled package in dist
+- or simply open package.json and click the desired command via script section
+- update changelog
+- commit the changes, including the dist folder, then push
+- tag the commit with the full version number:
+   git tag v1.2.3
+   git push origin v1.2.3
+- force push the `v1` tag to this commit:
+   git tag -f v1
+   git push origin v1 -f
