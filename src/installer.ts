@@ -190,6 +190,7 @@ export async function install_vulkan_runtime(
  */
 async function extract_archive(file: string, destination: string): Promise<string> {
   let extract = tc.extractTar // default extract method on linux: tar
+  let flags = 'xf'
 
   if (platform.IS_WINDOWS) {
     if (file.endsWith('.exe')) {
@@ -197,14 +198,16 @@ async function extract_archive(file: string, destination: string): Promise<strin
       return destination
     } else if (file.endsWith('.zip')) {
       extract = (file, destination) => tc.extractZip(file, destination)
+      flags = ''
     } else if (file.endsWith('.7z')) {
       extract = (file, destination) => tc.extract7z(file, destination)
+      flags = ''
     }
   } else if (platform.IS_MAC) {
     extract = (file, destination) => tc.extractXar(file, destination)
   }
 
-  return await extract(file, destination)
+  return await extract(file, destination, flags)
 }
 
 /**
