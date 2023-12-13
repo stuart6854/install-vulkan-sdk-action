@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 - Changed things.
 
+## [1.0.2] - 12-13-2023
+
+- Fix Linux/Mac sdk download urls
+
 ## [1.0.1] - 09-28-2023
 
 - added Changelog

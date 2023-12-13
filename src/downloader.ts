@@ -25,13 +25,13 @@ export async function get_url_vulkan_sdk(version: string): Promise<string> {
   let VULKAN_SDK_URL = ''
 
   if (platform.IS_WINDOWS) {
-    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/VulkanSDK-${version}-Installer.exe`
+    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkan_sdk.exe`
   }
   if (platform.IS_LINUX) {
-    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkansdk-linux-x86_64-${version}.tar.gz`
+    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkan_sdk.tar.gz`
   }
   if (platform.IS_MAC) {
-    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkansdk-macos-${version}.dmg`
+    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkan_sdk.dmg`
   }
 
   is_downloadable('VULKAN_SDK', version, VULKAN_SDK_URL)
@@ -117,13 +117,13 @@ export async function download_vulkan_runtime(version: string): Promise<string> 
  */
 export function get_vulkan_sdk_filename(): string {
   if (platform.IS_WINDOWS) {
-    return `VulkanSDK-Installer.exe`
+    return `vulkan_sdk.exe`
   }
   if (platform.IS_LINUX) {
-    return `vulkansdk-linux-x86_64.tar.gz`
+    return `vulkan_sdk.tar.gz`
   }
   if (platform.IS_MAC) {
-    return `vulkansdk-macos.dmg`
+    return `vulkan_sdk.dmg`
   }
   return 'not-implemented-for-platform'
 }
