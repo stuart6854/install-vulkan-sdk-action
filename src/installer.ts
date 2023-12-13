@@ -190,7 +190,7 @@ export async function install_vulkan_runtime(
  */
 async function extract_archive(file: string, destination: string): Promise<string> {
   let extract = tc.extractTar // default extract method on linux: tar
-  let flags = 'xf'
+  let flags = 'x'
 
   if (platform.IS_WINDOWS) {
     if (file.endsWith('.exe')) {
