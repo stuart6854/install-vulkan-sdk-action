@@ -28,7 +28,7 @@ export async function get_url_vulkan_sdk(version: string): Promise<string> {
     VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkan_sdk.exe`
   }
   if (platform.IS_LINUX) {
-    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkan_sdk.tar.gz`
+    VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkan_sdk.tar.xz`
   }
   if (platform.IS_MAC) {
     VULKAN_SDK_URL = `${DOWNLOAD_BASE_URL}/vulkan_sdk.dmg`
@@ -120,7 +120,7 @@ export function get_vulkan_sdk_filename(): string {
     return `vulkan_sdk.exe`
   }
   if (platform.IS_LINUX) {
-    return `vulkan_sdk.tar.gz`
+    return `vulkan_sdk.tar.xz`
   }
   if (platform.IS_MAC) {
     return `vulkan_sdk.dmg`
